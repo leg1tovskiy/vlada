@@ -1,12 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import {
-  Volume2,
-  VolumeX,
-  BookOpen,
-  Sparkles,
-  List,
-  Heart,
-} from "lucide-react";
 import { VLADA_INTRO, VLADA_WISHES, type VladaWishItem } from "@/data/vlada-wishes";
 
 /**
@@ -231,8 +223,6 @@ export function MinecraftBook() {
   const [flipState, setFlipState] = useState<FlipState | null>(null);
   const flipTimerRef = useRef<number | null>(null);
 
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [showToc, setShowToc] = useState(false);
   const [nextHover, setNextHover] = useState(false);
   const [prevHover, setPrevHover] = useState(false);
   const bookContainerRef = useRef<HTMLDivElement>(null);
@@ -257,7 +247,8 @@ export function MinecraftBook() {
         flipTimerRef.current = null;
       }
 
-      if (soundEnabled) pageAudio.play();
+      // Звук перелистывания страниц всегда включен
+      pageAudio.play();
 
       const direction: "forward" | "backward" = target >= fromPage ? "forward" : "backward";
 
@@ -278,7 +269,7 @@ export function MinecraftBook() {
         flipTimerRef.current = null;
       }, 480);
     },
-    [soundEnabled, totalPages],
+    [totalPages],
   );
 
   const nextPage = useCallback(() => {
@@ -312,7 +303,7 @@ export function MinecraftBook() {
   return (
     <div
       ref={bookContainerRef}
-      className="relative flex flex-col items-center justify-center p-2 sm:p-4 transition-all select-none w-full"
+      className="relative flex flex-col items-center justify-center p-2 sm:p-4 pt-10 sm:pt-14 transition-all select-none w-full"
     >
       {/* ── Атмосферный фон Minecraft: Хэллоуинское мистическое свечение и угольки ──── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -327,103 +318,6 @@ export function MinecraftBook() {
         <div className="halloween-ember absolute bottom-1/3 right-1/4 size-2 rounded-full bg-orange-400/50 shadow-[0_0_10px_#ea580c]" style={{ animationDelay: "2.2s" }} />
         <div className="halloween-ember absolute top-2/3 left-1/3 size-1.5 rounded-full bg-purple-400/50 shadow-[0_0_8px_#c084fc]" style={{ animationDelay: "3.7s" }} />
       </div>
-
-      {/* ── Панель управления книгой (кнопки сгруппированы слева, угол тыквы справа полностью свободен) ── */}
-      <div className="relative z-20 mb-8 sm:mb-10 flex items-center justify-between gap-3 w-full max-w-[560px] px-2">
-        <div className="flex items-center gap-2">
-          {/* Кнопка оглавления */}
-          <button
-            type="button"
-            onClick={() => setShowToc(!showToc)}
-            className="mc-button flex h-7 items-center gap-1.5 px-2.5 text-[11px] font-minecraft"
-            title="Оглавление поздравлений"
-          >
-            <List className="size-3" />
-            <span>Страницы</span>
-          </button>
-
-          {/* Переключатель звука перелистывания */}
-          <button
-            type="button"
-            onClick={() => setSoundEnabled(!soundEnabled)}
-            className="mc-button flex h-7 items-center gap-1.5 px-2.5 text-[11px] font-minecraft"
-            title={soundEnabled ? "Выключить звук страниц" : "Включить звук страниц"}
-            aria-label="Звук"
-          >
-            {soundEnabled ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
-            <span className="text-[10px] hidden sm:inline">{soundEnabled ? "Звук" : "Без звука"}</span>
-          </button>
-        </div>
-
-        {/* Счётчик страниц слева от зоны тыквы */}
-        <div className="text-right pr-16 sm:pr-20">
-          <span className="text-xs text-white/60 font-minecraft">
-            Стр. <span className="text-orange-400 font-bold">{currentPage}</span> / {totalPages}
-          </span>
-        </div>
-      </div>
-
-      {/* ── Выпадающее оглавление со списком авторов ────────────────── */}
-      {showToc && (
-        <div className="relative z-30 mb-4 w-full max-w-[584px] rounded-xl border border-border/80 bg-surface/95 p-3.5 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-top-2">
-          <div className="flex items-center justify-between pb-2 border-b border-border/60">
-            <span className="text-xs font-bold text-fg font-minecraft flex items-center gap-1.5">
-              <BookOpen className="size-3.5 text-accent" />
-              Оглавление книги ({totalPages} стр.)
-            </span>
-            <button
-              type="button"
-              onClick={() => setShowToc(false)}
-              className="text-xs text-subtle hover:text-fg font-minecraft px-1.5"
-            >
-              Закрыть ✕
-            </button>
-          </div>
-          <div className="mt-2.5 max-h-56 space-y-1 overflow-y-auto no-scrollbar">
-            {/* Стр 1 */}
-            <button
-              type="button"
-              onClick={() => {
-                flipTo(1);
-                setShowToc(false);
-              }}
-              className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors font-minecraft ${
-                currentPage === 1 ? "bg-accent/20 text-accent font-bold" : "text-muted hover:bg-elevated hover:text-fg"
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <span className="text-[10px] opacity-70 font-mono">Стр. 1</span>
-                <span>Вступительный лист</span>
-              </span>
-              <Sparkles className="size-3 text-pink-400" />
-            </button>
-
-            {/* Поздравления */}
-            {VLADA_WISHES.map((w, idx) => {
-              const pNum = idx + 2;
-              const isActive = currentPage === pNum;
-              return (
-                <button
-                  key={w.id}
-                  type="button"
-                  onClick={() => {
-                    flipTo(pNum);
-                    setShowToc(false);
-                  }}
-                  className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors font-minecraft ${
-                    isActive ? "bg-accent/20 text-accent font-bold" : "text-muted hover:bg-elevated hover:text-fg"
-                  }`}
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="text-[10px] opacity-70 font-mono">Стр. {pNum}</span>
-                    <span className="truncate max-w-[320px] font-semibold">{w.author}</span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* ── САМА КНИГА MINECRAFT (1 в 1) ────────────────────────────── */}
       <div className="relative z-10 flex items-center justify-center">
@@ -451,8 +345,8 @@ export function MinecraftBook() {
             {/* Тень от торта на переплёте книги */}
             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-16 h-3 bg-black/60 rounded-full blur-[2px] pointer-events-none" />
 
-            {/* Надпись над тортом (без обрезки) */}
-            <div className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-black/90 px-2 py-0.5 text-[10px] text-pink-300 font-minecraft border border-pink-500/50 shadow-[0_0_14px_rgba(236,72,153,0.45)] pointer-events-none select-none z-50">
+            {/* Надпись над тортом (появляется ТОЛЬКО при наведении) */}
+            <div className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-black/90 px-2.5 py-0.5 text-[10px] text-pink-300 font-minecraft border border-pink-500/50 shadow-[0_0_14px_rgba(236,72,153,0.45)] pointer-events-none select-none z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               Поздравляем с днем рождения! 🎂
             </div>
 
@@ -487,8 +381,8 @@ export function MinecraftBook() {
               className="absolute -bottom-3 -left-4 w-12 h-12 pointer-events-none select-none pixelated opacity-50 -rotate-45"
             />
 
-            {/* Надпись над тыквой (без обрезки) */}
-            <div className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-black/90 px-2 py-0.5 text-[10px] text-amber-300 font-minecraft border border-amber-500/50 shadow-[0_0_14px_rgba(255,140,0,0.45)] pointer-events-none select-none z-50">
+            {/* Надпись над тыквой (появляется ТОЛЬКО при наведении) */}
+            <div className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-black/90 px-2.5 py-0.5 text-[10px] text-amber-300 font-minecraft border border-amber-500/50 shadow-[0_0_14px_rgba(255,140,0,0.45)] pointer-events-none select-none z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               Счастливого Хэллоуина! 🎃
             </div>
 
