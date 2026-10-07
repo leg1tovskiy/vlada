@@ -188,29 +188,29 @@ body {
   will-change: opacity, transform;
 }
 
-/* ── Плавное перелистывание страниц (Вперёд: справа налево; Назад: слева направо) ── */
+/* ── Плавное перелистывание страниц пергамента (Вперёд: справа налево; Назад: слева направо) ── */
 @keyframes spreadPeelForward {
   0% {
-    clip-path: polygon(0% 0%, 106% 0%, 102% 100%, 0% 100%);
+    clip-path: inset(0 0% 0 0);
   }
   100% {
-    clip-path: polygon(0% 0%, 0% 0%, -10% 100%, 0% 100%);
+    clip-path: inset(0 100% 0 0);
   }
 }
 
 @keyframes spreadPeelBackward {
   0% {
-    clip-path: polygon(-6% 0%, 100% 0%, 100% 100%, -2% 100%);
+    clip-path: inset(0 0 0 0%);
   }
   100% {
-    clip-path: polygon(100% 0%, 100% 0%, 110% 100%, 100% 100%);
+    clip-path: inset(0 0 0 100%);
   }
 }
 
 @keyframes spreadCurlRibbonForward {
   0% {
-    left: calc(100% - 18px);
-    opacity: 0.4;
+    left: calc(100% - 16px);
+    opacity: 0.35;
   }
   15% {
     opacity: 1;
@@ -219,14 +219,14 @@ body {
     opacity: 1;
   }
   100% {
-    left: -36px;
+    left: -34px;
     opacity: 0;
   }
 }
 
 @keyframes spreadCurlRibbonBackward {
   0% {
-    left: -36px;
+    left: -34px;
     opacity: 0;
   }
   15% {
@@ -236,8 +236,8 @@ body {
     opacity: 1;
   }
   100% {
-    left: calc(100% - 18px);
-    opacity: 0.4;
+    left: calc(100% - 16px);
+    opacity: 0.35;
   }
 }
 
@@ -247,27 +247,27 @@ body {
     opacity: 0.2;
   }
   20% {
-    opacity: 0.6;
+    opacity: 0.55;
   }
   80% {
     opacity: 0.5;
   }
   100% {
-    left: -30px;
+    left: -28px;
     opacity: 0;
   }
 }
 
 @keyframes spreadCurlShadowBackward {
   0% {
-    left: -30px;
+    left: -28px;
     opacity: 0;
   }
   20% {
     opacity: 0.5;
   }
   80% {
-    opacity: 0.6;
+    opacity: 0.55;
   }
   100% {
     left: calc(100% - 10px);
@@ -298,10 +298,8 @@ body {
     rgba(80, 45, 15, 0.28) 92%,
     rgba(40, 20, 5, 0.5) 100%
   );
-  box-shadow: 14px 0 24px -2px rgba(35, 18, 5, 0.45),
-              24px 0 38px -4px rgba(25, 12, 3, 0.3);
-  transform: skewY(-2.5deg) scaleY(1.02);
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+  box-shadow: 14px 0 24px -2px rgba(35, 18, 5, 0.45);
+  transform: skewY(-2deg);
 }
 
 .spread-curl-ribbon-backward {
@@ -317,10 +315,8 @@ body {
     rgba(120, 80, 40, 0.18) 82%,
     rgba(60, 35, 15, 0.35) 100%
   );
-  box-shadow: -14px 0 24px -2px rgba(35, 18, 5, 0.45),
-              -24px 0 38px -4px rgba(25, 12, 3, 0.3);
-  transform: skewY(2.5deg) scaleY(1.02);
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+  box-shadow: -14px 0 24px -2px rgba(35, 18, 5, 0.45);
+  transform: skewY(2deg);
 }
 
 .spread-curl-shadow-forward {
