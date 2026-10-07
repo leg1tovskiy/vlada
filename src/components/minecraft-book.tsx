@@ -440,16 +440,44 @@ export function MinecraftBook() {
             className="absolute inset-0 size-full object-fill pixelated pointer-events-none"
           />
 
-          {/* ── Хэллоуин: Пиксельная тыквочка, уютно сидящая на верхнем правом углу книги ── */}
+          {/* ── Праздник: 3-этажный торт на верхнем левом углу книги ── */}
           <div
             className="absolute z-40 pointer-events-auto select-none group"
             style={{
-              top: "-26px",
-              right: "-10px",
+              top: "-36px",
+              left: "-12px",
+            }}
+          >
+            {/* Тень от торта на переплёте книги */}
+            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-16 h-3 bg-black/60 rounded-full blur-[2px] pointer-events-none" />
+
+            {/* Надпись над тортом (без обрезки) */}
+            <div className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-black/90 px-2 py-0.5 text-[10px] text-pink-300 font-minecraft border border-pink-500/50 shadow-[0_0_14px_rgba(236,72,153,0.45)] pointer-events-none select-none z-50">
+              Поздравляем с днем рождения! 🎂
+            </div>
+
+            {/* Сам 3-этажный пиксельный торт со свечами */}
+            <div className="relative candle-glow transition-transform duration-300 ease-out group-hover:scale-105 cursor-pointer">
+              <img
+                src="/cake-3tier.svg"
+                alt="3-Tier Birthday Cake"
+                draggable={false}
+                className="h-auto object-contain pixelated pointer-events-none"
+                style={{ imageRendering: "pixelated", width: "68px", maxWidth: "68px" }}
+              />
+            </div>
+          </div>
+
+          {/* ── Хэллоуин: Пиксельная тыквочка на верхнем правом углу книги (исходный аккуратный размер) ── */}
+          <div
+            className="absolute z-40 pointer-events-auto select-none group"
+            style={{
+              top: "-28px",
+              right: "-12px",
             }}
           >
             {/* Тень от тыквы на кожаном переплёте книги */}
-            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-16 sm:w-20 h-3 bg-black/60 rounded-full blur-[2.5px] pointer-events-none" />
+            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-16 h-3 bg-black/60 rounded-full blur-[2px] pointer-events-none" />
 
             {/* Паутинка, свисающая с уголка книги под тыквой */}
             <img
@@ -459,14 +487,19 @@ export function MinecraftBook() {
               className="absolute -bottom-3 -left-4 w-12 h-12 pointer-events-none select-none pixelated opacity-50 -rotate-45"
             />
 
-            {/* Сама пиксельная тыква с тёплым хэллоуинским мерцанием свечи */}
-            <div className="relative halloween-pumpkin-glow transition-transform duration-300 ease-out group-hover:scale-110 group-hover:rotate-12 cursor-pointer">
+            {/* Надпись над тыквой (без обрезки) */}
+            <div className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-black/90 px-2 py-0.5 text-[10px] text-amber-300 font-minecraft border border-amber-500/50 shadow-[0_0_14px_rgba(255,140,0,0.45)] pointer-events-none select-none z-50">
+              Счастливого Хэллоуина! 🎃
+            </div>
+
+            {/* Сама пиксельная тыква (исходный аккуратный размер) */}
+            <div className="relative halloween-pumpkin-glow transition-transform duration-300 ease-out group-hover:scale-105 cursor-pointer">
               <img
                 src="/pixel-pumpkin.png"
                 alt="Halloween Jack-o'-lantern"
                 draggable={false}
-                className="w-18 sm:w-22 h-auto object-contain pixelated pointer-events-none"
-                style={{ imageRendering: "pixelated" }}
+                className="h-auto object-contain pixelated pointer-events-none"
+                style={{ imageRendering: "pixelated", width: "72px", maxWidth: "72px" }}
               />
             </div>
           </div>

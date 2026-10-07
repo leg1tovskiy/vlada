@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" shape-rendering="crispEdges" width="80" height="96">
+  <defs>
+    <filter id="flame-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.5" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- ══════════ СВЕЧИ НА ВЕРХНЕМ ЯРУСЕ ══════════ -->
+  <!-- Свеча 1 (Левая) -->
+  <rect x="26" y="10" width="4" height="12" fill="#f43f5e" />
+  <rect x="27" y="11" width="2" height="10" fill="#fda4af" />
+  <rect x="27" y="7" width="2" height="3" fill="#1f2937" />
+  <!-- Огонек 1 -->
+  <ellipse cx="28" cy="5" rx="3" ry="4" fill="#fbbf24" filter="url(#flame-glow)" />
+  <ellipse cx="28" cy="5" rx="1.5" ry="2.5" fill="#ffffff" />
+
+  <!-- Свеча 2 (Центральная, золотая) -->
+  <rect x="38" y="6" width="4" height="16" fill="#f59e0b" />
+  <rect x="39" y="7" width="2" height="14" fill="#fef08a" />
+  <rect x="39" y="3" width="2" height="3" fill="#1f2937" />
+  <!-- Огонек 2 -->
+  <ellipse cx="40" cy="1.5" rx="3.5" ry="5" fill="#f97316" filter="url(#flame-glow)" />
+  <ellipse cx="40" cy="1.5" rx="2" ry="3" fill="#ffffff" />
+
+  <!-- Свеча 3 (Правая) -->
+  <rect x="50" y="10" width="4" height="12" fill="#a855f7" />
+  <rect x="51" y="11" width="2" height="10" fill="#e9d5ff" />
+  <rect x="51" y="7" width="2" height="3" fill="#1f2937" />
+  <!-- Огонек 3 -->
+  <ellipse cx="52" cy="5" rx="3" ry="4" fill="#fbbf24" filter="url(#flame-glow)" />
+  <ellipse cx="52" cy="5" rx="1.5" ry="2.5" fill="#ffffff" />
+
+  <!-- ══════════ ВЕРХНИЙ ЯРУС (Tier 3) ══════════ -->
+  <!-- Тень под верхним ярусом -->
+  <rect x="22" y="38" width="36" height="2" fill="#1e1208" opacity="0.4" />
+  <!-- Основа верхнего яруса (бисквит) -->
+  <rect x="22" y="22" width="36" height="16" fill="#8d5b24" />
+  <rect x="22" y="22" width="36" height="1" fill="#4d3010" />
+  <rect x="22" y="37" width="36" height="1" fill="#382008" />
+  <rect x="22" y="22" width="1" height="16" fill="#382008" />
+  <rect x="57" y="22" width="1" height="16" fill="#382008" />
+  <!-- Прослойка крема -->
+  <rect x="24" y="29" width="32" height="3" fill="#fde68a" />
+  <rect x="24" y="30" width="32" height="1" fill="#ffffff" />
+  <!-- Белая глазурь сверху -->
+  <rect x="22" y="22" width="36" height="5" fill="#ffffff" />
+  <rect x="22" y="22" width="36" height="2" fill="#f8fafc" />
+  <!-- Подтеки глазури -->
+  <rect x="24" y="27" width="3" height="3" fill="#ffffff" />
+  <rect x="30" y="27" width="2" height="2" fill="#ffffff" />
+  <rect x="36" y="27" width="4" height="3" fill="#ffffff" />
+  <rect x="44" y="27" width="3" height="2" fill="#ffffff" />
+  <rect x="50" y="27" width="3" height="3" fill="#ffffff" />
+  <!-- Ягодки / вишенки сверху (красные точки как в Minecraft) -->
+  <rect x="25" y="23" width="2" height="2" fill="#dc2626" />
+  <rect x="34" y="23" width="2" height="2" fill="#dc2626" />
+  <rect x="44" y="23" width="2" height="2" fill="#dc2626" />
+  <rect x="53" y="23" width="2" height="2" fill="#dc2626" />
+
+  <!-- ══════════ СРЕДНИЙ ЯРУС (Tier 2) ══════════ -->
+  <!-- Тень под средним ярусом -->
+  <rect x="14" y="60" width="52" height="2" fill="#1e1208" opacity="0.4" />
+  <!-- Основа среднего яруса -->
+  <rect x="14" y="40" width="52" height="20" fill="#9a6428" />
+  <rect x="14" y="40" width="1" height="20" fill="#382008" />
+  <rect x="65" y="40" width="1" height="20" fill="#382008" />
+  <rect x="14" y="59" width="52" height="1" fill="#382008" />
+  <!-- Крем в среднем ярусе -->
+  <rect x="16" y="49" width="48" height="4" fill="#fef08a" />
+  <rect x="16" y="50" width="48" height="2" fill="#ffffff" />
+  <!-- Глазурь среднего яруса -->
+  <rect x="14" y="40" width="52" height="6" fill="#ffffff" />
+  <rect x="14" y="40" width="52" height="2" fill="#f8fafc" />
+  <!-- Подтеки глазури -->
+  <rect x="16" y="46" width="3" height="4" fill="#ffffff" />
+  <rect x="22" y="46" width="4" height="3" fill="#ffffff" />
+  <rect x="31" y="46" width="3" height="4" fill="#ffffff" />
+  <rect x="39" y="46" width="4" height="3" fill="#ffffff" />
+  <rect x="47" y="46" width="3" height="4" fill="#ffffff" />
+  <rect x="55" y="46" width="4" height="3" fill="#ffffff" />
+  <rect x="61" y="46" width="2" height="2" fill="#ffffff" />
+  <!-- Клубнички / ягодки -->
+  <rect x="17" y="42" width="2" height="2" fill="#dc2626" />
+  <rect x="28" y="42" width="2" height="2" fill="#dc2626" />
+  <rect x="51" y="42" width="2" height="2" fill="#dc2626" />
+  <rect x="62" y="42" width="2" height="2" fill="#dc2626" />
+
+  <!-- ══════════ НИЖНИЙ ЯРУС (Tier 1) ══════════ -->
+  <!-- Подставка / тарелка снизу -->
+  <rect x="4" y="87" width="72" height="3" fill="#475569" />
+  <rect x="6" y="86" width="68" height="1" fill="#94a3b8" />
+  <!-- Основа нижнего яруса -->
+  <rect x="6" y="62" width="68" height="24" fill="#8d5b24" />
+  <rect x="6" y="62" width="1" height="24" fill="#382008" />
+  <rect x="73" y="62" width="1" height="24" fill="#382008" />
+  <rect x="6" y="85" width="68" height="1" fill="#382008" />
+  <!-- Крем в нижнем ярусе (две аппетитные полоски) -->
+  <rect x="8" y="71" width="64" height="3" fill="#fde68a" />
+  <rect x="8" y="72" width="64" height="1" fill="#ffffff" />
+  <rect x="8" y="79" width="64" height="3" fill="#fde68a" />
+  <rect x="8" y="80" width="64" height="1" fill="#ffffff" />
+  <!-- Белая глазурь нижнего яруса -->
+  <rect x="6" y="62" width="68" height="6" fill="#ffffff" />
+  <rect x="6" y="62" width="68" height="2" fill="#f8fafc" />
+  <!-- Подтеки глазури -->
+  <rect x="9" y="68" width="3" height="4" fill="#ffffff" />
+  <rect x="16" y="68" width="4" height="3" fill="#ffffff" />
+  <rect x="24" y="68" width="4" height="4" fill="#ffffff" />
+  <rect x="33" y="68" width="3" height="3" fill="#ffffff" />
+  <rect x="41" y="68" width="5" height="4" fill="#ffffff" />
+  <rect x="50" y="68" width="4" height="3" fill="#ffffff" />
+  <rect x="58" y="68" width="3" height="4" fill="#ffffff" />
+  <rect x="66" y="68" width="3" height="3" fill="#ffffff" />
+  <!-- Клубнички / ягодки -->
+  <rect x="10" y="64" width="2" height="2" fill="#dc2626" />
+  <rect x="21" y="64" width="2" height="2" fill="#dc2626" />
+  <rect x="36" y="64" width="2" height="2" fill="#dc2626" />
+  <rect x="47" y="64" width="2" height="2" fill="#dc2626" />
+  <rect x="59" y="64" width="2" height="2" fill="#dc2626" />
+  <rect x="69" y="64" width="2" height="2" fill="#dc2626" />
+</svg>

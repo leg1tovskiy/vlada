@@ -278,3 +278,38 @@ body {
 .halloween-ember {
   animation: spookyFloat 6s ease-in-out infinite;
 }
+
+/* ── Праздничные анимации (Шарики, Хлопушки, Свечи торта) ── */
+@keyframes balloonBob {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-16px) rotate(3deg);
+  }
+}
+
+@keyframes popperJiggle {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.06) rotate(4deg);
+  }
+}
+
+@keyframes candleFlicker {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.8)) drop-shadow(0 0 14px rgba(249, 115, 22, 0.5));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba(251, 191, 36, 1)) drop-shadow(0 0 20px rgba(249, 115, 22, 0.7));
+    transform: scale(1.02);
+  }
+}
+
+.candle-glow {
+  animation: candleFlicker 2.4s ease-in-out infinite;
+}
+

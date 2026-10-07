@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import confetti from "canvas-confetti";
 import { Sparkles, Maximize2, Minimize2, Lock, Key, Clock, PartyPopper } from "lucide-react";
 import { MinecraftBook } from "@/components/minecraft-book";
+import { FestiveDecorations } from "@/components/festive-decorations";
 
 // Временное окно доступа: 14 октября 21:59 МСК - 15 октября 22:00 МСК
 const ACCESS_START = new Date("2026-10-14T21:59:00+03:00").getTime();
@@ -89,6 +90,9 @@ export function App() {
 
   return (
     <div className="min-h-screen flex flex-col justify-between text-[#eef0f4] relative selection:bg-orange-500/30 selection:text-orange-200">
+      {/* Праздничные декорации по всей странице: шарики, хлопушки, тыквы */}
+      <FestiveDecorations />
+
       {/* Верхняя навигационная панель */}
       <header className="relative z-30 flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/10 bg-black/40 backdrop-blur-md">
         <div className="flex items-center gap-2.5">
