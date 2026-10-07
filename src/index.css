@@ -172,53 +172,64 @@
 
 @media (max-width: 767px) {
   .nickname-sky {
-    position: relative;
-    inset: auto;
-    width: 100%;
-    max-width: 440px;
-    margin: 8px auto 0;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 4px 6px;
-    pointer-events: auto;
-    max-height: 170px;
+    position: absolute;
+    inset: 0;
+    z-index: 15;
+    pointer-events: none;
     overflow: hidden;
-    padding: 0 6px;
   }
 
   .floating-nick-spot {
-    position: static;
-    translate: none;
-    animation: none;
+    position: absolute;
+    left: var(--nick-mobile-x);
+    top: var(--nick-mobile-y);
+    translate: -50% -50%;
+    animation: nicknameFloat var(--nick-duration) ease-in-out var(--nick-delay) infinite alternate;
+    pointer-events: auto;
   }
 
   .floating-nick {
-    max-width: 110px;
-    font-size: 10.5px;
-    padding: 2px 6px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 9999px;
-    text-shadow: 0 1px 4px #000;
-    line-height: 1.1;
+    max-width: 88px;
+    font-size: 10px;
+    padding: 1.5px 3.5px;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    text-shadow: 0 1px 4px #000, 0 0 10px var(--nick-color);
+    line-height: 1.15;
+    opacity: 0.9;
+  }
+
+  .floating-nick:hover,
+  .floating-nick:focus {
+    transform: scale(1.18);
+    opacity: 1;
   }
 
   .floating-nick-avatar {
-    bottom: auto;
-    top: calc(100% + 4px);
-    width: 62px;
-    height: 62px;
+    bottom: calc(100% + 4px);
+    top: auto;
+    width: 56px;
+    height: 56px;
+  }
+
+  .countdown-card {
+    padding: 14px 12px !important;
+    max-width: min(90vw, 360px) !important;
+  }
+
+  .vlada-badge {
+    gap: 4px;
+    margin-bottom: 6px;
   }
 
   .vlada-badge-avatar {
-    width: 64px;
-    height: 64px;
+    width: 52px;
+    height: 52px;
   }
 
   .vlada-badge-name {
-    font-size: 21px;
+    font-size: 18px;
   }
 }
 
