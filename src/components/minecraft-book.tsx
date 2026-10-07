@@ -317,7 +317,7 @@ function LeftPageView({
         src="/cobweb.png"
         alt=""
         draggable={false}
-        className="absolute z-15 pointer-events-none select-none pixelated mix-blend-multiply opacity-35"
+        className="absolute z-15 pointer-events-none select-none pixelated opacity-25"
         style={{
           top: "6.2%",
           left: "9.6%",
@@ -387,7 +387,7 @@ function RightPageView({
         src="/cobweb.png"
         alt=""
         draggable={false}
-        className="absolute z-15 pointer-events-none select-none pixelated mix-blend-multiply opacity-25 -scale-x-100 -scale-y-100"
+        className="absolute z-15 pointer-events-none select-none pixelated opacity-20 -scale-x-100 -scale-y-100"
         style={{
           bottom: "9.8%",
           right: "8.6%",
@@ -695,16 +695,13 @@ export function MinecraftBook() {
               }}
             >
               {/* Лицевая сторона: уходящая правая страница (видна при 0°..-90°) */}
-              <div className="absolute inset-0 size-full overflow-hidden backface-hidden">
+              <div className="absolute inset-0 size-full overflow-hidden flip-face-front">
                 <RightPageView spreadIndex={flipState.fromSpread} />
                 <div className="absolute inset-0 size-full pointer-events-none flip-shadow-front" />
               </div>
 
               {/* Оборотная сторона: приходящая левая страница (видна при -90°..-180°) */}
-              <div
-                className="absolute inset-0 size-full overflow-hidden backface-hidden"
-                style={{ transform: "rotateY(180deg)" }}
-              >
+              <div className="absolute inset-0 size-full overflow-hidden flip-face-back">
                 <LeftPageView
                   spreadIndex={flipState.targetSpread}
                   totalSpreads={totalSpreads}
@@ -727,7 +724,7 @@ export function MinecraftBook() {
               }}
             >
               {/* Лицевая сторона: уходящая левая страница (видна при 0°..90°) */}
-              <div className="absolute inset-0 size-full overflow-hidden backface-hidden">
+              <div className="absolute inset-0 size-full overflow-hidden flip-face-front">
                 <LeftPageView
                   spreadIndex={flipState.fromSpread}
                   totalSpreads={totalSpreads}
@@ -736,10 +733,7 @@ export function MinecraftBook() {
               </div>
 
               {/* Оборотная сторона: приходящая правая страница (видна при 90°..180°) */}
-              <div
-                className="absolute inset-0 size-full overflow-hidden backface-hidden"
-                style={{ transform: "rotateY(180deg)" }}
-              >
+              <div className="absolute inset-0 size-full overflow-hidden flip-face-back">
                 <RightPageView spreadIndex={flipState.targetSpread} />
                 <div className="absolute inset-0 size-full pointer-events-none flip-shadow-back" />
               </div>
@@ -755,26 +749,27 @@ export function MinecraftBook() {
                 isOpening ? "book-decor-reveal" : ""
               }`}
               style={{
-                top: "-36px",
-                left: "-12px",
+                top: "clamp(-36px, -4.5vw, -24px)",
+                left: "clamp(-14px, -1.8vw, -8px)",
               }}
             >
-              {/* Тень от торта на переплёте книги */}
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-16 h-3 bg-black/60 rounded-full blur-[2px] pointer-events-none" />
-
               {/* Надпись над тортом (появляется ТОЛЬКО при наведении) */}
               <div className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-black/90 px-2.5 py-0.5 text-[10px] text-pink-300 font-minecraft border border-pink-500/50 shadow-[0_0_14px_rgba(236,72,153,0.45)] pointer-events-none select-none z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                 Поздравляем с днем рождения! 🎂
               </div>
 
               {/* Сам 3-этажный пиксельный торт со свечами */}
-              <div className="relative candle-glow transition-transform duration-300 ease-out group-hover:scale-105 cursor-pointer">
+              <div className="relative candle-glow transition-transform duration-300 ease-out group-hover:scale-105 cursor-pointer filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]">
                 <img
                   src="/cake-3tier.svg"
                   alt="3-Tier Birthday Cake"
                   draggable={false}
                   className="h-auto object-contain pixelated pointer-events-none"
-                  style={{ imageRendering: "pixelated", width: "68px", maxWidth: "68px" }}
+                  style={{
+                    imageRendering: "pixelated",
+                    width: "clamp(46px, 6.8vw, 68px)",
+                    maxWidth: "68px",
+                  }}
                 />
               </div>
             </div>
@@ -785,19 +780,20 @@ export function MinecraftBook() {
                 isOpening ? "book-decor-reveal" : ""
               }`}
               style={{
-                top: "-28px",
-                right: "-12px",
+                top: "clamp(-30px, -3.8vw, -20px)",
+                right: "clamp(-14px, -1.8vw, -8px)",
               }}
             >
-              {/* Тень от тыквы на кожаном переплёте книги */}
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-16 h-3 bg-black/60 rounded-full blur-[2px] pointer-events-none" />
-
               {/* Паутинка, свисающая с уголка книги под тыквой */}
               <img
                 src="/cobweb.png"
                 alt=""
                 draggable={false}
-                className="absolute -bottom-3 -left-4 w-12 h-12 pointer-events-none select-none pixelated opacity-50 -rotate-45"
+                className="absolute -bottom-2 -left-3 pointer-events-none select-none pixelated opacity-30 -rotate-45"
+                style={{
+                  width: "clamp(28px, 4vw, 42px)",
+                  height: "clamp(28px, 4vw, 42px)",
+                }}
               />
 
               {/* Надпись над тыквой (появляется ТОЛЬКО при наведении) */}
@@ -812,7 +808,11 @@ export function MinecraftBook() {
                   alt="Halloween Jack-o'-lantern"
                   draggable={false}
                   className="h-auto object-contain pixelated pointer-events-none"
-                  style={{ imageRendering: "pixelated", width: "72px", maxWidth: "72px" }}
+                  style={{
+                    imageRendering: "pixelated",
+                    width: "clamp(50px, 7.2vw, 72px)",
+                    maxWidth: "72px",
+                  }}
                 />
               </div>
             </div>

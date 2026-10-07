@@ -421,17 +421,62 @@ body {
 }
 
 .flip-leaf-forward {
-  animation: flipLeafForward 0.5s cubic-bezier(0.25, 1, 0.45, 1) forwards !important;
+  animation: flipLeafForward 0.5s ease-in-out forwards !important;
   transform-origin: left center !important;
   transform-style: preserve-3d !important;
   will-change: transform;
 }
 
 .flip-leaf-backward {
-  animation: flipLeafBackward 0.5s cubic-bezier(0.25, 1, 0.45, 1) forwards !important;
+  animation: flipLeafBackward 0.5s ease-in-out forwards !important;
   transform-origin: right center !important;
   transform-style: preserve-3d !important;
   will-change: transform;
+}
+
+/* 
+ * Защита от просвечивания зеркального текста в WebKit/iOS Safari:
+ * Лицевая сторона (front) строго скрывается после перехода через 90 градусов (50% времени),
+ * а оборотная сторона (back) строго скрыта до 90 градусов (50% времени).
+ */
+@keyframes flipFaceFrontToggle {
+  0%, 49.9% {
+    opacity: 1;
+    visibility: visible;
+  }
+  50%, 100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes flipFaceBackToggle {
+  0%, 49.9% {
+    opacity: 0;
+    visibility: hidden;
+  }
+  50%, 100% {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.flip-face-front {
+  animation: flipFaceFrontToggle 0.5s linear forwards !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+  background-color: #fbf2dc;
+  transform: translateZ(1px);
+  -webkit-transform: translateZ(1px);
+}
+
+.flip-face-back {
+  animation: flipFaceBackToggle 0.5s linear forwards !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+  transform: rotateY(180deg) translateZ(1px);
+  -webkit-transform: rotateY(180deg) translateZ(1px);
+  background-color: #fbf2dc;
 }
 
 .backface-hidden {
@@ -444,20 +489,20 @@ body {
   0% {
     opacity: 0;
   }
-  40% {
-    opacity: 0.35;
+  45% {
+    opacity: 0.22;
   }
   100% {
-    opacity: 0.7;
+    opacity: 0;
   }
 }
 
 @keyframes flipShadowBackAnim {
   0% {
-    opacity: 0.7;
+    opacity: 0;
   }
-  60% {
-    opacity: 0.25;
+  55% {
+    opacity: 0.22;
   }
   100% {
     opacity: 0;
@@ -465,12 +510,12 @@ body {
 }
 
 .flip-shadow-front {
-  background: linear-gradient(to left, rgba(35, 18, 5, 0.45) 0%, transparent 65%);
+  background: linear-gradient(to left, rgba(60, 35, 10, 0.22) 0%, transparent 60%);
   animation: flipShadowFrontAnim 0.5s ease-in-out forwards;
 }
 
 .flip-shadow-back {
-  background: linear-gradient(to right, rgba(35, 18, 5, 0.45) 0%, transparent 65%);
+  background: linear-gradient(to right, rgba(60, 35, 10, 0.22) 0%, transparent 60%);
   animation: flipShadowBackAnim 0.5s ease-in-out forwards;
 }
 
