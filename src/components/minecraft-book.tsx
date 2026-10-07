@@ -19,29 +19,22 @@ class PageTurnAudio {
     "/sounds/page_flip2.ogg",
     "/sounds/page_flip3.ogg",
   ];
-  private pool: HTMLAudioElement[] = [];
-
-  constructor() {
-    if (typeof window !== "undefined") {
-      this.pool = this.audioFiles.map((src) => {
-        const audio = new Audio(src);
-        audio.preload = "auto";
-        return audio;
-      });
-    }
-  }
 
   play() {
     try {
-      if (typeof window === "undefined" || this.pool.length === 0) return;
-      const index = Math.floor(Math.random() * this.pool.length);
-      const original = this.pool[index];
-      // Клонируем для естественного наложения при быстром перелистывании
-      const sound = original.cloneNode() as HTMLAudioElement;
-      sound.volume = 0.9;
-      // Лёгкая вариация скорости/питча (0.95 - 1.05), как в звуковом движке Minecraft
-      sound.playbackRate = 0.95 + Math.random() * 0.1;
-      void sound.play();
+      if (typeof window === "undefined") return;
+      const index = Math.floor(Math.random() * this.audioFiles.length);
+      const audio = new Audio(this.audioFiles[index]);
+      audio.volume = 0.95;
+      audio.playbackRate = 0.95 + Math.random() * 0.1;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          const fallback = new Audio(`/page_flip${index + 1}.ogg`);
+          fallback.volume = 0.95;
+          void fallback.play().catch(() => {});
+        });
+      }
     } catch {
       // Игнорируем ограничения автовоспроизведения
     }
@@ -475,10 +468,6 @@ export function MinecraftBook() {
                 className="w-18 sm:w-22 h-auto object-contain pixelated pointer-events-none"
                 style={{ imageRendering: "pixelated" }}
               />
-              {/* Всплывающая подсказка при наведении (без обрезки) */}
-              <div className="absolute -top-7 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap rounded-md bg-black/95 px-2.5 py-1 text-[11px] text-amber-300 font-minecraft border border-amber-500/50 shadow-2xl z-50">
-                Счастливого Хэллоуина! 🎃
-              </div>
             </div>
           </div>
 
@@ -577,7 +566,6 @@ export function MinecraftBook() {
                 width: "15.75%", // 23px / 146px
                 aspectRatio: "23/13",
               }}
-              title="Предыдущая страница (← или A)"
               aria-label="Предыдущая страница"
             >
               <img
@@ -603,7 +591,6 @@ export function MinecraftBook() {
                 width: "15.75%", // 23px / 146px
                 aspectRatio: "23/13",
               }}
-              title="Следующая страница (→ или D)"
               aria-label="Следующая страница"
             >
               <img

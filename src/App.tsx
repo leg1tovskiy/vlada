@@ -13,7 +13,11 @@ export function App() {
   const [previewUnlocked, setPreviewUnlocked] = useState(() => {
     if (typeof window === "undefined") return false;
     const url = new URL(window.location.href);
-    if (url.searchParams.has("preview") || url.searchParams.has("key") || url.searchParams.has("secret")) {
+    if (
+      url.searchParams.get("key")?.toLowerCase() === "sdnemrojdeniyavlada" ||
+      url.searchParams.get("secret")?.toLowerCase() === "sdnemrojdeniyavlada" ||
+      url.searchParams.has("preview")
+    ) {
       return true;
     }
     return localStorage.getItem("vlada_preview_unlocked") === "true";
@@ -72,8 +76,7 @@ export function App() {
   const handleUnlockWithKey = (e: React.FormEvent) => {
     e.preventDefault();
     const clean = inputKey.trim().toLowerCase();
-    // Разрешенные секретные ключи: vladabirthday, premute, fear, 1410
-    if (["premute", "vlada", "fear", "1410", "652399540384694292", "948819481734545469"].includes(clean)) {
+    if (clean === "sdnemrojdeniyavlada") {
       setPreviewUnlocked(true);
       localStorage.setItem("vlada_preview_unlocked", "true");
       setShowKeyModal(false);
@@ -200,7 +203,7 @@ export function App() {
               <span>Осталось совсем немного терпения...</span>
             </div>
 
-            {/* Кнопка предпросмотра для владельцев */}
+            {/* Кнопка ввода ключа доступа */}
             <div className="pt-4 border-t border-white/10 flex items-center justify-center gap-3">
               <button
                 type="button"
@@ -208,7 +211,7 @@ export function App() {
                 className="mc-button flex h-7 items-center gap-1.5 px-3 text-[11px] font-minecraft"
               >
                 <Key className="size-3 text-amber-300" />
-                <span>Предпросмотр (для создателей)</span>
+                <span>Ввести ключ доступа</span>
               </button>
             </div>
           </div>
@@ -224,7 +227,7 @@ export function App() {
               <h3 className="text-sm font-bold font-minecraft text-white">Ключ доступа к книге</h3>
             </div>
             <p className="text-xs text-white/60 font-minecraft mb-4">
-              Введите секретное кодовое слово (например: <code className="text-orange-300 font-bold">premute</code> или <code className="text-orange-300 font-bold">vlada</code>):
+              Введите секретное кодовое слово:
             </p>
 
             <form onSubmit={handleUnlockWithKey} className="space-y-3">
@@ -235,7 +238,7 @@ export function App() {
                   setInputKey(e.target.value);
                   setKeyError(false);
                 }}
-                placeholder="Секретный ключ..."
+                placeholder=""
                 autoFocus
                 className="w-full rounded-lg border border-white/15 bg-black/50 px-3 py-2 text-xs font-minecraft text-white placeholder-white/30 focus:border-orange-500 focus:outline-none"
               />
@@ -269,9 +272,6 @@ export function App() {
         <span>Сделано с любовью командой FearProject & premute ❤️</span>
         <div className="flex items-center gap-3">
           <span>14—15 октября 2026</span>
-          {previewUnlocked && (
-            <span className="text-green-400/80 font-bold">● Режим создателя активен</span>
-          )}
         </div>
       </footer>
     </div>
