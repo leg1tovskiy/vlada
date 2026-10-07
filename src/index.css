@@ -29,6 +29,182 @@
   image-rendering: crisp-edges;
 }
 
+.countdown-main {
+  min-height: 1250px;
+  justify-content: flex-start;
+  padding-top: 35px;
+  padding-bottom: 35px;
+}
+
+.countdown-card {
+  margin-top: 65px;
+}
+
+.vlada-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.vlada-badge-avatar {
+  width: 82px;
+  height: 82px;
+  max-width: none;
+  border: 3px solid #fef3c7;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.12), 0 0 30px rgba(253, 230, 138, 0.3);
+}
+
+.vlada-badge-name {
+  color: #fff1c2;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-shadow: 0 2px 8px #000, 0 0 18px rgba(251, 191, 36, 0.75);
+}
+
+.nickname-sky {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  pointer-events: none;
+}
+
+@keyframes nicknameFloat {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(var(--nick-drift-x), var(--nick-drift-y), 0); }
+}
+
+.floating-nick-spot {
+  position: absolute;
+  left: var(--nick-x);
+  top: var(--nick-y);
+  translate: -50% -50%;
+  animation: nicknameFloat var(--nick-duration) ease-in-out var(--nick-delay) infinite alternate;
+  pointer-events: auto;
+}
+
+.floating-nick-spot:hover,
+.floating-nick-spot:focus-within {
+  z-index: 20;
+  animation-play-state: paused;
+}
+
+.floating-nick {
+  position: relative;
+  display: inline-block;
+  max-width: 180px;
+  padding: 7px 10px;
+  border: 0;
+  background: none;
+  color: var(--nick-color);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  text-shadow: 0 2px 8px #000, 0 0 16px var(--nick-color);
+  overflow-wrap: anywhere;
+  opacity: 0.8;
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+
+.floating-nick:hover,
+.floating-nick:focus {
+  transform: scale(1.18);
+  opacity: 1;
+}
+
+.floating-nick:focus-visible {
+  outline: 2px solid var(--nick-color);
+  outline-offset: 3px;
+  border-radius: 5px;
+}
+
+.floating-nick-avatar {
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  width: 104px;
+  height: 104px;
+  max-width: none;
+  border: 3px solid var(--nick-color);
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.45), 0 10px 28px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 12px) scale(0.65);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.floating-nick:hover .floating-nick-avatar,
+.floating-nick:focus .floating-nick-avatar {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+@media (max-width: 1240px) {
+  .countdown-main {
+    min-height: 1300px;
+  }
+
+  .countdown-card {
+    margin-top: 0;
+  }
+
+  .floating-nick-spot {
+    left: var(--nick-tablet-x);
+    top: var(--nick-tablet-y);
+  }
+}
+
+@media (max-width: 767px) {
+  .countdown-main {
+    min-height: 1950px;
+    padding-top: 28px;
+  }
+
+  .floating-nick-spot {
+    left: var(--nick-mobile-x);
+    top: var(--nick-mobile-y);
+  }
+
+  .floating-nick {
+    max-width: 155px;
+    font-size: 12px;
+  }
+
+  .floating-nick-avatar {
+    width: 88px;
+    height: 88px;
+  }
+
+  .vlada-badge-avatar {
+    width: 74px;
+    height: 74px;
+  }
+
+  .vlada-badge-name {
+    font-size: 23px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-nick-spot {
+    animation: none;
+  }
+
+  .floating-nick,
+  .floating-nick-avatar {
+    transition: none;
+  }
+}
+
 :root {
   color-scheme: dark;
 }
@@ -302,12 +478,75 @@ body {
 }
 
 /* ── Праздничные анимации (Шарики, Хлопушки, Свечи торта) ── */
-@keyframes balloonBob {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
+@keyframes balloonRise {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(var(--balloon-drift), calc(-100dvh - 190px), 0); }
+}
+
+@keyframes balloonPop {
+  0% { transform: scale(1); opacity: 1; }
+  35% { transform: scale(1.22); opacity: 1; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+@keyframes balloonBurst {
+  from { transform: rotate(var(--burst-angle)) translateY(0) scale(1); opacity: 1; }
+  to { transform: rotate(var(--burst-angle)) translateY(-45px) scale(0.2); opacity: 0; }
+}
+
+.floating-balloon {
+  position: absolute;
+  bottom: -105px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  animation-name: balloonRise;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.55));
+}
+
+.floating-balloon:focus-visible {
+  outline: 2px solid #fdba74;
+  outline-offset: 4px;
+}
+
+.balloon-art {
+  display: block;
+}
+
+.balloon-art-popped {
+  animation: balloonPop 300ms ease-out forwards;
+}
+
+.balloon-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.balloon-burst i {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--balloon-color);
+  animation: balloonBurst 420ms ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-balloon {
+    bottom: 10vh;
+    animation: none;
   }
-  50% {
-    transform: translateY(-16px) rotate(3deg);
+
+  .balloon-art-popped,
+  .balloon-burst i {
+    animation-duration: 1ms;
   }
 }
 

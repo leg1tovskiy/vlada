@@ -3,6 +3,8 @@ import confetti from "canvas-confetti";
 import { Sparkles, Maximize2, Minimize2, Lock, Key, Clock, PartyPopper } from "lucide-react";
 import { MinecraftBook } from "@/components/minecraft-book";
 import { FestiveDecorations } from "@/components/festive-decorations";
+import { AvatarGallery } from "@/components/avatar-gallery";
+import { VladaBadge } from "@/components/vlada-badge";
 
 // Временное окно доступа: 14 октября 21:59 МСК - 15 октября 22:00 МСК
 const ACCESS_START = new Date("2026-10-14T21:59:00+03:00").getTime();
@@ -136,9 +138,12 @@ export function App() {
       </header>
 
       {/* Основное содержимое страницы */}
-      <main className="flex-1 flex flex-col items-center justify-center p-2 sm:p-4 relative">
+      <main className={`flex-1 flex flex-col items-center justify-center px-2 py-8 sm:px-4 relative ${!isAllowed && !isExpired ? "countdown-main" : ""}`}>
         {isAllowed ? (
-          <MinecraftBook />
+          <>
+            <VladaBadge />
+            <MinecraftBook />
+          </>
         ) : isExpired ? (
           /* Экран после окончания праздничного окна */
           <div className="relative z-10 max-w-md w-full mx-4 p-6 sm:p-8 rounded-2xl border border-white/10 bg-black/60 backdrop-blur-xl text-center shadow-2xl">
@@ -164,61 +169,62 @@ export function App() {
           </div>
         ) : (
           /* Экран обратного отсчёта до 14 октября 21:59 МСК */
-          <div className="relative z-10 max-w-lg w-full mx-4 p-6 sm:p-8 rounded-2xl border border-orange-500/20 bg-black/70 backdrop-blur-xl text-center shadow-[0_0_50px_rgba(255,120,0,0.15)]">
-            <div className="inline-flex p-3.5 rounded-2xl bg-orange-500/15 border border-orange-500/30 text-orange-400 mb-4 halloween-pumpkin-glow">
-              <img src="/pixel-pumpkin.png" alt="Pumpkin" className="w-12 h-12 pixelated object-contain" />
-            </div>
+          <>
+            <div className="countdown-card relative z-10 max-w-lg w-full mx-4 p-6 sm:p-8 rounded-2xl border border-orange-500/20 bg-black/70 backdrop-blur-xl text-center shadow-[0_0_50px_rgba(255,120,0,0.15)]">
+              <VladaBadge />
 
-            <h2 className="text-lg sm:text-xl font-bold font-minecraft text-orange-400 mb-1">
-              Книга зачарована и запечатана 🎃
-            </h2>
-            <p className="text-xs sm:text-sm text-white/70 font-minecraft mb-6">
-              Страницы откроются 14 октября ровно в 21:59 по Московскому времени!
-            </p>
+              <h2 className="text-lg sm:text-xl font-bold font-minecraft text-orange-400 mb-1">
+                Книга зачарована и запечатана 🎃
+              </h2>
+              <p className="text-xs sm:text-sm text-white/70 font-minecraft mb-6">
+                Страницы откроются 14 октября ровно в 21:59 по Московскому времени!
+              </p>
 
-            {/* Карточки таймера */}
-            <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-6 font-minecraft">
-              <div className="bg-white/5 border border-white/10 rounded-xl p-2.5">
-                <div className="text-xl sm:text-2xl font-bold text-orange-300">{timeLeft.days}</div>
-                <div className="text-[10px] text-white/50 uppercase tracking-wider">Дней</div>
-              </div>
-              <div className="bg-white/5 border border-white/10 rounded-xl p-2.5">
-                <div className="text-xl sm:text-2xl font-bold text-orange-300">
-                  {String(timeLeft.hours).padStart(2, "0")}
+              {/* Карточки таймера */}
+              <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-6 font-minecraft">
+                <div className="bg-white/5 border border-white/10 rounded-xl p-2.5">
+                  <div className="text-xl sm:text-2xl font-bold text-orange-300">{timeLeft.days}</div>
+                  <div className="text-[10px] text-white/50 uppercase tracking-wider">Дней</div>
                 </div>
-                <div className="text-[10px] text-white/50 uppercase tracking-wider">Часов</div>
-              </div>
-              <div className="bg-white/5 border border-white/10 rounded-xl p-2.5">
-                <div className="text-xl sm:text-2xl font-bold text-orange-300">
-                  {String(timeLeft.minutes).padStart(2, "0")}
+                <div className="bg-white/5 border border-white/10 rounded-xl p-2.5">
+                  <div className="text-xl sm:text-2xl font-bold text-orange-300">
+                    {String(timeLeft.hours).padStart(2, "0")}
+                  </div>
+                  <div className="text-[10px] text-white/50 uppercase tracking-wider">Часов</div>
                 </div>
-                <div className="text-[10px] text-white/50 uppercase tracking-wider">Минут</div>
-              </div>
-              <div className="bg-white/5 border border-white/10 rounded-xl p-2.5">
-                <div className="text-xl sm:text-2xl font-bold text-orange-400 animate-pulse">
-                  {String(timeLeft.seconds).padStart(2, "0")}
+                <div className="bg-white/5 border border-white/10 rounded-xl p-2.5">
+                  <div className="text-xl sm:text-2xl font-bold text-orange-300">
+                    {String(timeLeft.minutes).padStart(2, "0")}
+                  </div>
+                  <div className="text-[10px] text-white/50 uppercase tracking-wider">Минут</div>
                 </div>
-                <div className="text-[10px] text-white/50 uppercase tracking-wider">Секунд</div>
+                <div className="bg-white/5 border border-white/10 rounded-xl p-2.5">
+                  <div className="text-xl sm:text-2xl font-bold text-orange-400 animate-pulse">
+                    {String(timeLeft.seconds).padStart(2, "0")}
+                  </div>
+                  <div className="text-[10px] text-white/50 uppercase tracking-wider">Секунд</div>
+                </div>
+              </div>
+
+              <div className="text-xs text-white/40 font-minecraft flex items-center justify-center gap-1.5 mb-6">
+                <Clock className="size-3.5" />
+                <span>Осталось совсем немного терпения...</span>
+              </div>
+
+              {/* Кнопка ввода ключа доступа */}
+              <div className="pt-4 border-t border-white/10 flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowKeyModal(true)}
+                  className="mc-button flex h-7 items-center gap-1.5 px-3 text-[11px] font-minecraft"
+                >
+                  <Key className="size-3 text-amber-300" />
+                  <span>Ввести ключ доступа</span>
+                </button>
               </div>
             </div>
-
-            <div className="text-xs text-white/40 font-minecraft flex items-center justify-center gap-1.5 mb-6">
-              <Clock className="size-3.5" />
-              <span>Осталось совсем немного терпения...</span>
-            </div>
-
-            {/* Кнопка ввода ключа доступа */}
-            <div className="pt-4 border-t border-white/10 flex items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => setShowKeyModal(true)}
-                className="mc-button flex h-7 items-center gap-1.5 px-3 text-[11px] font-minecraft"
-              >
-                <Key className="size-3 text-amber-300" />
-                <span>Ввести ключ доступа</span>
-              </button>
-            </div>
-          </div>
+            <AvatarGallery />
+          </>
         )}
       </main>
 
