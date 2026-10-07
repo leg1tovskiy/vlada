@@ -401,147 +401,77 @@ body {
   will-change: opacity, transform;
 }
 
-/* ── Плавное перелистывание страниц пергамента (Вперёд: справа налево; Назад: слева направо) ── */
-@keyframes spreadPeelForward {
+/* ── Аутентичное 3D-перелистывание страницы книги Minecraft через корешок ── */
+@keyframes flipLeafForward {
   0% {
-    clip-path: inset(0 0% 0 0);
+    transform: rotateY(0deg);
   }
   100% {
-    clip-path: inset(0 100% 0 0);
+    transform: rotateY(-180deg);
   }
 }
 
-@keyframes spreadPeelBackward {
+@keyframes flipLeafBackward {
   0% {
-    clip-path: inset(0 0 0 0%);
+    transform: rotateY(0deg);
   }
   100% {
-    clip-path: inset(0 0 0 100%);
+    transform: rotateY(180deg);
   }
 }
 
-@keyframes spreadCurlRibbonForward {
+.flip-leaf-forward {
+  animation: flipLeafForward 0.5s cubic-bezier(0.25, 1, 0.45, 1) forwards !important;
+  transform-origin: left center !important;
+  transform-style: preserve-3d !important;
+  will-change: transform;
+}
+
+.flip-leaf-backward {
+  animation: flipLeafBackward 0.5s cubic-bezier(0.25, 1, 0.45, 1) forwards !important;
+  transform-origin: right center !important;
+  transform-style: preserve-3d !important;
+  will-change: transform;
+}
+
+.backface-hidden {
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+}
+
+/* Мягкая динамическая тень по переворачивающемуся листу */
+@keyframes flipShadowFrontAnim {
   0% {
-    left: calc(100% - 16px);
+    opacity: 0;
+  }
+  40% {
     opacity: 0.35;
   }
-  15% {
-    opacity: 1;
-  }
-  85% {
-    opacity: 1;
-  }
   100% {
-    left: -34px;
-    opacity: 0;
+    opacity: 0.7;
   }
 }
 
-@keyframes spreadCurlRibbonBackward {
+@keyframes flipShadowBackAnim {
   0% {
-    left: -34px;
-    opacity: 0;
+    opacity: 0.7;
   }
-  15% {
-    opacity: 1;
-  }
-  85% {
-    opacity: 1;
+  60% {
+    opacity: 0.25;
   }
   100% {
-    left: calc(100% - 16px);
-    opacity: 0.35;
-  }
-}
-
-@keyframes spreadCurlShadowForward {
-  0% {
-    left: calc(100% - 10px);
-    opacity: 0.2;
-  }
-  20% {
-    opacity: 0.55;
-  }
-  80% {
-    opacity: 0.5;
-  }
-  100% {
-    left: -28px;
     opacity: 0;
   }
 }
 
-@keyframes spreadCurlShadowBackward {
-  0% {
-    left: -28px;
-    opacity: 0;
-  }
-  20% {
-    opacity: 0.5;
-  }
-  80% {
-    opacity: 0.55;
-  }
-  100% {
-    left: calc(100% - 10px);
-    opacity: 0.2;
-  }
+.flip-shadow-front {
+  background: linear-gradient(to left, rgba(35, 18, 5, 0.45) 0%, transparent 65%);
+  animation: flipShadowFrontAnim 0.5s ease-in-out forwards;
 }
 
-.spread-peel-forward {
-  animation: spreadPeelForward 0.44s cubic-bezier(0.25, 0.1, 0.25, 1) forwards !important;
-  will-change: clip-path;
-}
-
-.spread-peel-backward {
-  animation: spreadPeelBackward 0.44s cubic-bezier(0.25, 0.1, 0.25, 1) forwards !important;
-  will-change: clip-path;
-}
-
-.spread-curl-ribbon-forward {
-  animation: spreadCurlRibbonForward 0.44s cubic-bezier(0.25, 0.1, 0.25, 1) forwards !important;
-  will-change: left, opacity;
-  background: linear-gradient(
-    to right,
-    rgba(60, 35, 15, 0.35) 0%,
-    rgba(120, 80, 40, 0.18) 18%,
-    #fdf6e4 38%,
-    #ffffff 58%,
-    #fbf2dc 78%,
-    rgba(80, 45, 15, 0.28) 92%,
-    rgba(40, 20, 5, 0.5) 100%
-  );
-  box-shadow: 14px 0 24px -2px rgba(35, 18, 5, 0.45);
-  transform: skewY(-2deg);
-}
-
-.spread-curl-ribbon-backward {
-  animation: spreadCurlRibbonBackward 0.44s cubic-bezier(0.25, 0.1, 0.25, 1) forwards !important;
-  will-change: left, opacity;
-  background: linear-gradient(
-    to right,
-    rgba(40, 20, 5, 0.5) 0%,
-    rgba(80, 45, 15, 0.28) 8%,
-    #fbf2dc 22%,
-    #ffffff 42%,
-    #fdf6e4 62%,
-    rgba(120, 80, 40, 0.18) 82%,
-    rgba(60, 35, 15, 0.35) 100%
-  );
-  box-shadow: -14px 0 24px -2px rgba(35, 18, 5, 0.45);
-  transform: skewY(2deg);
-}
-
-.spread-curl-shadow-forward {
-  animation: spreadCurlShadowForward 0.44s cubic-bezier(0.25, 0.1, 0.25, 1) forwards !important;
-  will-change: left, opacity;
-  background: linear-gradient(to right, rgba(40, 20, 5, 0.38) 0%, rgba(40, 20, 5, 0) 100%);
-}
-
-.spread-curl-shadow-backward {
-  animation: spreadCurlShadowBackward 0.44s cubic-bezier(0.25, 0.1, 0.25, 1) forwards !important;
-  will-change: left, opacity;
-  background: linear-gradient(to left, rgba(40, 20, 5, 0.38) 0%, rgba(40, 20, 5, 0) 100%);
+.flip-shadow-back {
+  background: linear-gradient(to right, rgba(35, 18, 5, 0.45) 0%, transparent 65%);
+  animation: flipShadowBackAnim 0.5s ease-in-out forwards;
 }
 
 /* ── Halloween Spooky Effects ────────────────────────────────────────── */

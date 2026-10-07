@@ -290,6 +290,147 @@ function RightPageContent({
   );
 }
 
+/**
+ * Полный вид левой половины разворота книги (текстура, паутинка, номер страницы, текст)
+ */
+function LeftPageView({
+  spreadIndex,
+  totalSpreads,
+  isOpening,
+}: {
+  spreadIndex: number;
+  totalSpreads: number;
+  isOpening?: boolean;
+}) {
+  return (
+    <div className="absolute inset-0 size-full overflow-hidden select-none">
+      {/* Текстура левой половины книги: симметрично отражена (-scale-x-100), красный шов у корешка */}
+      <img
+        src="/book-bg-4x.png"
+        alt="Minecraft Book Left Page"
+        draggable={false}
+        className="absolute inset-0 size-full object-fill pixelated pointer-events-none -scale-x-100"
+      />
+
+      {/* Паутинка в левом верхнем углу пергамента */}
+      <img
+        src="/cobweb.png"
+        alt=""
+        draggable={false}
+        className="absolute z-15 pointer-events-none select-none pixelated mix-blend-multiply opacity-35"
+        style={{
+          top: "6.2%",
+          left: "9.6%",
+          width: "clamp(28px, 6.5%, 44px)",
+          aspectRatio: "1/1",
+        }}
+      />
+
+      {/* Номер страницы / заголовок слева вверху (Page X of Y) */}
+      <div
+        className={`absolute z-20 pointer-events-none text-black font-minecraft text-left font-normal ${
+          isOpening ? "book-content-reveal" : ""
+        }`}
+        style={{
+          top: "7.9%",
+          left: "12%",
+          fontSize: "clamp(11px, 1.8vw, 15px)",
+          lineHeight: 1,
+        }}
+      >
+        Page {spreadIndex} of {totalSpreads}
+      </div>
+
+      {/* Содержимое левой страницы */}
+      <div
+        className={`absolute z-15 flex flex-col justify-between overflow-hidden ${
+          isOpening ? "book-content-reveal" : ""
+        }`}
+        style={{
+          top: "14%",
+          left: "12%",
+          right: "14%",
+          bottom: "14%",
+        }}
+      >
+        <LeftPageContent spreadIndex={spreadIndex} />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Полный вид правой половины разворота книги (текстура, паутинка, заголовок, текст)
+ */
+function RightPageView({
+  spreadIndex,
+  isOpening,
+}: {
+  spreadIndex: number;
+  isOpening?: boolean;
+}) {
+  const isIntro = spreadIndex === 1;
+  const wish = !isIntro ? processWishSpread(VLADA_WISHES[spreadIndex - 2]) : null;
+
+  return (
+    <div className="absolute inset-0 size-full overflow-hidden select-none">
+      {/* Текстура правой половины книги: стандартное положение, красный шов у корешка слева */}
+      <img
+        src="/book-bg-4x.png"
+        alt="Minecraft Book Right Page"
+        draggable={false}
+        className="absolute inset-0 size-full object-fill pixelated pointer-events-none"
+      />
+
+      {/* Паутинка в нижнем правом углу пергамента */}
+      <img
+        src="/cobweb.png"
+        alt=""
+        draggable={false}
+        className="absolute z-15 pointer-events-none select-none pixelated mix-blend-multiply opacity-25 -scale-x-100 -scale-y-100"
+        style={{
+          bottom: "9.8%",
+          right: "8.6%",
+          width: "clamp(24px, 5.5%, 36px)",
+          aspectRatio: "1/1",
+        }}
+      />
+
+      {/* Заголовок правой страницы: отображается ТОЛЬКО если на 2 странице есть продолжение */}
+      {wish && wish.p2 ? (
+        <div
+          className={`absolute z-20 pointer-events-none text-black font-minecraft text-right font-normal ${
+            isOpening ? "book-content-reveal" : ""
+          }`}
+          style={{
+            top: "7.9%",
+            right: "12%",
+            fontSize: "clamp(11px, 1.8vw, 15px)",
+            lineHeight: 1,
+          }}
+        >
+          Page {spreadIndex}
+        </div>
+      ) : null}
+
+      {/* Содержимое правой страницы */}
+      <div
+        className={`absolute z-15 flex flex-col justify-between overflow-hidden ${
+          isOpening ? "book-content-reveal" : ""
+        }`}
+        style={{
+          top: "14%",
+          left: "14%",
+          right: "12%",
+          bottom: "14%",
+        }}
+      >
+        <RightPageContent spreadIndex={spreadIndex} />
+      </div>
+    </div>
+  );
+}
+
 type FlipState = {
   id: number;
   fromSpread: number;
@@ -337,15 +478,10 @@ export function MinecraftBook() {
 
   const flipTo = useCallback(
     (spread: number) => {
-      if (isOpening) return;
+      if (isOpening || flipTimerRef.current !== null) return;
       const target = Math.max(1, Math.min(totalSpreads, spread));
       const fromSpread = spreadRef.current;
-      if (target === fromSpread && !flipTimerRef.current) return;
-
-      if (flipTimerRef.current !== null) {
-        clearTimeout(flipTimerRef.current);
-        flipTimerRef.current = null;
-      }
+      if (target === fromSpread) return;
 
       // Звук перелистывания страниц всегда включен
       pageAudio.play();
@@ -353,7 +489,6 @@ export function MinecraftBook() {
       const direction: "forward" | "backward" = target >= fromSpread ? "forward" : "backward";
 
       spreadRef.current = target;
-      setCurrentSpread(target);
 
       flipIdRef.current += 1;
       setFlipState({
@@ -364,9 +499,10 @@ export function MinecraftBook() {
       });
 
       flipTimerRef.current = window.setTimeout(() => {
+        setCurrentSpread(target);
         setFlipState(null);
         flipTimerRef.current = null;
-      }, 440);
+      }, 500);
     },
     [isOpening, totalSpreads],
   );
@@ -401,6 +537,15 @@ export function MinecraftBook() {
 
   const currentWish =
     currentSpread > 1 ? processWishSpread(VLADA_WISHES[currentSpread - 2]) : null;
+
+  // Во время анимации перелистывания базовые развороты показывают неподвижные страницы
+  const baseLeftSpread = flipState
+    ? (flipState.direction === "forward" ? flipState.fromSpread : flipState.targetSpread)
+    : currentSpread;
+
+  const baseRightSpread = flipState
+    ? (flipState.direction === "forward" ? flipState.targetSpread : flipState.fromSpread)
+    : currentSpread;
 
   return (
     <div
@@ -519,60 +664,14 @@ export function MinecraftBook() {
             }`}
             style={{ zIndex: 10 }}
           >
-            {/* Текстура левой половины книги: симметрично отражена (-scale-x-100), красный шов у корешка */}
-            <img
-              src="/book-bg-4x.png"
-              alt="Minecraft Book Left Page"
-              draggable={false}
-              className="absolute inset-0 size-full object-fill pixelated pointer-events-none -scale-x-100"
+            <LeftPageView
+              spreadIndex={baseLeftSpread}
+              totalSpreads={totalSpreads}
+              isOpening={isOpening}
             />
-
-            {/* Паутинка в левом верхнем углу пергамента */}
-            <img
-              src="/cobweb.png"
-              alt=""
-              draggable={false}
-              className="absolute z-15 pointer-events-none select-none pixelated mix-blend-multiply opacity-35"
-              style={{
-                top: "6.2%",
-                left: "9.6%",
-                width: "clamp(28px, 6.5%, 44px)",
-                aspectRatio: "1/1",
-              }}
-            />
-
-            {/* Номер страницы / заголовок слева вверху (Page X of Y) */}
-            <div
-              className={`absolute z-20 pointer-events-none text-black font-minecraft text-left font-normal ${
-                isOpening ? "book-content-reveal" : ""
-              }`}
-              style={{
-                top: "7.9%",
-                left: "12%",
-                fontSize: "clamp(11px, 1.8vw, 15px)",
-                lineHeight: 1,
-              }}
-            >
-              Page {currentSpread} of {totalSpreads}
-            </div>
-
-            {/* Содержимое левой страницы */}
-            <div
-              className={`absolute z-15 flex flex-col justify-between overflow-hidden ${
-                isOpening ? "book-content-reveal" : ""
-              }`}
-              style={{
-                top: "14%",
-                left: "12%",
-                right: "14%",
-                bottom: "14%",
-              }}
-            >
-              <LeftPageContent spreadIndex={currentSpread} />
-            </div>
 
             {/* Кнопка перехода к предыдущему развороту (на левой странице) */}
-            {currentSpread > 1 ? (
+            {!flipState && currentSpread > 1 ? (
               <button
                 type="button"
                 onClick={prevSpread}
@@ -613,62 +712,13 @@ export function MinecraftBook() {
             }`}
             style={{ zIndex: 10 }}
           >
-            {/* Текстура правой половины книги: стандартное положение, красный шов у корешка слева */}
-            <img
-              src="/book-bg-4x.png"
-              alt="Minecraft Book Right Page"
-              draggable={false}
-              className="absolute inset-0 size-full object-fill pixelated pointer-events-none"
+            <RightPageView
+              spreadIndex={baseRightSpread}
+              isOpening={isOpening}
             />
-
-            {/* Паутинка в нижнем правом углу пергамента */}
-            <img
-              src="/cobweb.png"
-              alt=""
-              draggable={false}
-              className="absolute z-15 pointer-events-none select-none pixelated mix-blend-multiply opacity-25 -scale-x-100 -scale-y-100"
-              style={{
-                bottom: "9.8%",
-                right: "8.6%",
-                width: "clamp(24px, 5.5%, 36px)",
-                aspectRatio: "1/1",
-              }}
-            />
-
-            {/* Заголовок правой страницы: отображается ТОЛЬКО если на 2 странице есть продолжение */}
-            {currentWish && currentWish.p2 ? (
-              <div
-                className={`absolute z-20 pointer-events-none text-black font-minecraft text-right font-normal ${
-                  isOpening ? "book-content-reveal" : ""
-                }`}
-                style={{
-                  top: "7.9%",
-                  right: "12%",
-                  fontSize: "clamp(11px, 1.8vw, 15px)",
-                  lineHeight: 1,
-                }}
-              >
-                Page {currentSpread}
-              </div>
-            ) : null}
-
-            {/* Содержимое правой страницы */}
-            <div
-              className={`absolute z-15 flex flex-col justify-between overflow-hidden ${
-                isOpening ? "book-content-reveal" : ""
-              }`}
-              style={{
-                top: "14%",
-                left: "14%",
-                right: "12%",
-                bottom: "14%",
-              }}
-            >
-              <RightPageContent spreadIndex={currentSpread} />
-            </div>
 
             {/* Кнопка перехода к следующему развороту (на правой странице) */}
-            {currentSpread < totalSpreads ? (
+            {!flipState && currentSpread < totalSpreads ? (
               <button
                 type="button"
                 onClick={nextSpread}
@@ -693,86 +743,68 @@ export function MinecraftBook() {
             ) : null}
           </div>
 
-          {/* ── АУТЕНТИЧНОЕ ПЕРЕЛИСТЫВАНИЕ ПЕРГАМЕНТА (СТРОГО ВНУТРИ ГРАНИЦ СТРАНИЦЫ) ── */}
-          {/* ВПЕРЁД: Правая страница уходящего разворота отгибается СПРАВА НАЛЕВО */}
+          {/* ── АУТЕНТИЧНЫЙ 3D-ЛИСТ ПЕРЕЛИСТЫВАНИЯ СТРАНИЦ (ПЕРЕКИДЫВАЕТСЯ ЧЕРЕЗ КОРЕШОК) ── */}
+          {/* ВПЕРЁД: Лист перелистывается справа налево (с 0° до -180°) */}
           {flipState && flipState.direction === "forward" && (
             <div
-              key={`peel-forward-${flipState.id}`}
-              className="absolute pointer-events-none overflow-hidden z-25 spread-peel-forward"
+              key={`leaf-forward-${flipState.id}`}
+              className="absolute top-0 bottom-0 pointer-events-none select-none flip-leaf-forward z-30"
               style={{
-                top: "6.2%",
-                bottom: "9.8%",
                 left: "50%",
-                right: "8.6%",
-                background:
-                  "linear-gradient(135deg, #fcf4e3 0%, #fffbee 40%, #fcf4e2 75%, #f6ebd2 100%)",
-                boxShadow: "inset 0 0 10px rgba(180, 140, 90, 0.2)",
+                width: "50%",
+                transformOrigin: "left center",
+                transformStyle: "preserve-3d",
               }}
             >
-              <div
-                className="absolute inset-0 size-full flex flex-col justify-between overflow-hidden"
-                style={{
-                  paddingTop: "8%",
-                  paddingLeft: "10%",
-                  paddingRight: "8%",
-                  paddingBottom: "5%",
-                }}
-              >
-                <RightPageContent spreadIndex={flipState.fromSpread} />
+              {/* Лицевая сторона: уходящая правая страница (видна при 0°..-90°) */}
+              <div className="absolute inset-0 size-full overflow-hidden backface-hidden">
+                <RightPageView spreadIndex={flipState.fromSpread} />
+                <div className="absolute inset-0 size-full pointer-events-none flip-shadow-front" />
               </div>
 
-              {/* Мягкая бегущая тень по открывающемуся листу (справа налево) */}
+              {/* Оборотная сторона: приходящая левая страница (видна при -90°..-180°) */}
               <div
-                className="absolute top-0 bottom-0 pointer-events-none spread-curl-shadow-forward"
-                style={{ width: "22px" }}
-              />
-
-              {/* 3D-гребень изгиба перелистываемого листа пергамента (справа налево) */}
-              <div
-                className="absolute top-0 bottom-0 pointer-events-none spread-curl-ribbon-forward"
-                style={{ width: "32px" }}
-              />
+                className="absolute inset-0 size-full overflow-hidden backface-hidden"
+                style={{ transform: "rotateY(180deg)" }}
+              >
+                <LeftPageView
+                  spreadIndex={flipState.targetSpread}
+                  totalSpreads={totalSpreads}
+                />
+                <div className="absolute inset-0 size-full pointer-events-none flip-shadow-back" />
+              </div>
             </div>
           )}
 
-          {/* НАЗАД: Левая страница уходящего разворота отгибается СЛЕВА НАПРАВО */}
+          {/* НАЗАД: Лист перелистывается слева направо (с 0° до 180°) */}
           {flipState && flipState.direction === "backward" && (
             <div
-              key={`peel-backward-${flipState.id}`}
-              className="absolute pointer-events-none overflow-hidden z-25 spread-peel-backward"
+              key={`leaf-backward-${flipState.id}`}
+              className="absolute top-0 bottom-0 pointer-events-none select-none flip-leaf-backward z-30"
               style={{
-                top: "6.2%",
-                bottom: "9.8%",
-                left: "8.6%",
-                right: "50%",
-                background:
-                  "linear-gradient(135deg, #fcf4e3 0%, #fffbee 40%, #fcf4e2 75%, #f6ebd2 100%)",
-                boxShadow: "inset 0 0 10px rgba(180, 140, 90, 0.2)",
+                left: 0,
+                width: "50%",
+                transformOrigin: "right center",
+                transformStyle: "preserve-3d",
               }}
             >
-              <div
-                className="absolute inset-0 size-full flex flex-col justify-between overflow-hidden"
-                style={{
-                  paddingTop: "8%",
-                  paddingLeft: "8%",
-                  paddingRight: "10%",
-                  paddingBottom: "5%",
-                }}
-              >
-                <LeftPageContent spreadIndex={flipState.fromSpread} />
+              {/* Лицевая сторона: уходящая левая страница (видна при 0°..90°) */}
+              <div className="absolute inset-0 size-full overflow-hidden backface-hidden">
+                <LeftPageView
+                  spreadIndex={flipState.fromSpread}
+                  totalSpreads={totalSpreads}
+                />
+                <div className="absolute inset-0 size-full pointer-events-none flip-shadow-front" />
               </div>
 
-              {/* Мягкая бегущая тень по открывающемуся листу (слева направо) */}
+              {/* Оборотная сторона: приходящая правая страница (видна при 90°..180°) */}
               <div
-                className="absolute top-0 bottom-0 pointer-events-none spread-curl-shadow-backward"
-                style={{ width: "22px" }}
-              />
-
-              {/* 3D-гребень изгиба перелистываемого листа пергамента (слева направо) */}
-              <div
-                className="absolute top-0 bottom-0 pointer-events-none spread-curl-ribbon-backward"
-                style={{ width: "32px" }}
-              />
+                className="absolute inset-0 size-full overflow-hidden backface-hidden"
+                style={{ transform: "rotateY(180deg)" }}
+              >
+                <RightPageView spreadIndex={flipState.targetSpread} />
+                <div className="absolute inset-0 size-full pointer-events-none flip-shadow-back" />
+              </div>
             </div>
           )}
         </div>
