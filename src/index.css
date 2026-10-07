@@ -29,6 +29,210 @@
   image-rendering: crisp-edges;
 }
 
+.countdown-main {
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  padding: 0;
+}
+
+.countdown-card {
+  margin-top: 0;
+}
+
+.vlada-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.vlada-badge-avatar {
+  width: 82px;
+  height: 82px;
+  max-width: none;
+  border: 3px solid #fef3c7;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.12), 0 0 30px rgba(253, 230, 138, 0.3);
+}
+
+.vlada-badge-name {
+  color: #fff1c2;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-shadow: 0 2px 8px #000, 0 0 18px rgba(251, 191, 36, 0.75);
+}
+
+.nickname-sky {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+@keyframes nicknameFloat {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(var(--nick-drift-x), var(--nick-drift-y), 0); }
+}
+
+.floating-nick-spot {
+  position: absolute;
+  left: var(--nick-x);
+  top: var(--nick-y);
+  translate: -50% -50%;
+  animation: nicknameFloat var(--nick-duration) ease-in-out var(--nick-delay) infinite alternate;
+  pointer-events: auto;
+  will-change: transform;
+}
+
+.floating-nick-spot:hover,
+.floating-nick-spot:focus-within {
+  z-index: 30;
+  animation-play-state: paused;
+}
+
+.floating-nick {
+  position: relative;
+  display: inline-block;
+  max-width: 140px;
+  padding: 3.5px 7px;
+  border: 0;
+  background: none;
+  color: var(--nick-color);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-shadow: 0 1px 4px #000, 0 0 12px var(--nick-color);
+  overflow-wrap: anywhere;
+  opacity: 0.85;
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+
+.floating-nick:hover,
+.floating-nick:focus {
+  transform: scale(1.16);
+  opacity: 1;
+}
+
+.floating-nick:focus-visible {
+  outline: 2px solid var(--nick-color);
+  outline-offset: 3px;
+  border-radius: 5px;
+}
+
+.floating-nick-avatar {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  width: 78px;
+  height: 78px;
+  max-width: none;
+  border: 2.5px solid var(--nick-color);
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 5px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.75);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 10px) scale(0.65);
+  transition: opacity 200ms ease, transform 200ms ease;
+  z-index: 60;
+}
+
+.floating-nick:hover .floating-nick-avatar,
+.floating-nick:focus .floating-nick-avatar {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+@media (max-width: 1100px) {
+  .floating-nick-spot {
+    left: var(--nick-tablet-x);
+    top: var(--nick-tablet-y);
+  }
+
+  .floating-nick {
+    max-width: 120px;
+    font-size: 11.5px;
+    padding: 2.5px 5px;
+  }
+
+  .floating-nick-avatar {
+    width: 68px;
+    height: 68px;
+  }
+}
+
+@media (max-width: 767px) {
+  .nickname-sky {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    max-width: 440px;
+    margin: 8px auto 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 4px 6px;
+    pointer-events: auto;
+    max-height: 170px;
+    overflow: hidden;
+    padding: 0 6px;
+  }
+
+  .floating-nick-spot {
+    position: static;
+    translate: none;
+    animation: none;
+  }
+
+  .floating-nick {
+    max-width: 110px;
+    font-size: 10.5px;
+    padding: 2px 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+    text-shadow: 0 1px 4px #000;
+    line-height: 1.1;
+  }
+
+  .floating-nick-avatar {
+    bottom: auto;
+    top: calc(100% + 4px);
+    width: 62px;
+    height: 62px;
+  }
+
+  .vlada-badge-avatar {
+    width: 64px;
+    height: 64px;
+  }
+
+  .vlada-badge-name {
+    font-size: 21px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-nick-spot {
+    animation: none;
+  }
+
+  .floating-nick,
+  .floating-nick-avatar {
+    transition: none;
+  }
+}
+
 :root {
   color-scheme: dark;
 }
@@ -36,13 +240,22 @@
 html, body {
   margin: 0;
   padding: 0;
+  width: 100%;
   height: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+  max-height: 100dvh;
   background-color: #08090b;
   color: #eef0f4;
-  overflow: hidden; /* Полностью исключает появление любых полос прокрутки */
+  overflow: hidden !important; /* Полностью исключает появление любых полос прокрутки */
   user-select: none;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  max-height: 100dvh;
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
 }
 
 body {
@@ -99,11 +312,11 @@ body {
 }
 
 /* ── Minecraft Book Authentic Page Flip / Curl Animations ────────────────────── */
-/* ── Плавное раскрытие книги (~1.7 сек) без прерываний и рывков ── */
+/* ── Плавное, мягкое раскрытие книги (~1.4 сек) без прерываний и рывков ── */
 @keyframes bookSpreadOpenLeft {
   0% {
-    transform: rotateY(84deg) scale(0.9);
-    opacity: 0.85;
+    transform: rotateY(64deg) scale(0.94);
+    opacity: 0.9;
   }
   100% {
     transform: rotateY(0deg) scale(1);
@@ -113,8 +326,8 @@ body {
 
 @keyframes bookSpreadOpenRight {
   0% {
-    transform: rotateY(-84deg) scale(0.9);
-    opacity: 0.85;
+    transform: rotateY(-64deg) scale(0.94);
+    opacity: 0.9;
   }
   100% {
     transform: rotateY(0deg) scale(1);
@@ -129,7 +342,7 @@ body {
   }
   30% {
     opacity: 1;
-    transform: scaleX(1.8);
+    transform: scaleX(1.6);
   }
   100% {
     opacity: 0;
@@ -138,9 +351,9 @@ body {
 }
 
 @keyframes bookContentReveal {
-  0%, 35% {
+  0%, 25% {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(4px);
   }
   100% {
     opacity: 1;
@@ -149,9 +362,9 @@ body {
 }
 
 @keyframes bookDecorReveal {
-  0%, 40% {
+  0%, 30% {
     opacity: 0;
-    transform: translateY(-8px) scale(0.9);
+    transform: translateY(-6px) scale(0.92);
   }
   100% {
     opacity: 1;
@@ -160,31 +373,31 @@ body {
 }
 
 .book-spread-open-left {
-  animation: bookSpreadOpenLeft 1.7s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  animation: bookSpreadOpenLeft 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
   transform-origin: right center !important;
   backface-visibility: hidden;
   will-change: transform;
 }
 
 .book-spread-open-right {
-  animation: bookSpreadOpenRight 1.7s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  animation: bookSpreadOpenRight 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
   transform-origin: left center !important;
   backface-visibility: hidden;
   will-change: transform;
 }
 
 .book-spine-glow {
-  animation: bookSpineGlow 1.7s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  animation: bookSpineGlow 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
   will-change: opacity, transform;
 }
 
 .book-content-reveal {
-  animation: bookContentReveal 1.7s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  animation: bookContentReveal 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
   will-change: opacity, transform;
 }
 
 .book-decor-reveal {
-  animation: bookDecorReveal 1.7s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  animation: bookDecorReveal 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
   will-change: opacity, transform;
 }
 
@@ -368,12 +581,75 @@ body {
 }
 
 /* ── Праздничные анимации (Шарики, Хлопушки, Свечи торта) ── */
-@keyframes balloonBob {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
+@keyframes balloonRise {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(var(--balloon-drift), calc(-100dvh - 190px), 0); }
+}
+
+@keyframes balloonPop {
+  0% { transform: scale(1); opacity: 1; }
+  35% { transform: scale(1.22); opacity: 1; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+@keyframes balloonBurst {
+  from { transform: rotate(var(--burst-angle)) translateY(0) scale(1); opacity: 1; }
+  to { transform: rotate(var(--burst-angle)) translateY(-45px) scale(0.2); opacity: 0; }
+}
+
+.floating-balloon {
+  position: absolute;
+  bottom: -105px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  animation-name: balloonRise;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.55));
+}
+
+.floating-balloon:focus-visible {
+  outline: 2px solid #fdba74;
+  outline-offset: 4px;
+}
+
+.balloon-art {
+  display: block;
+}
+
+.balloon-art-popped {
+  animation: balloonPop 300ms ease-out forwards;
+}
+
+.balloon-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.balloon-burst i {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--balloon-color);
+  animation: balloonBurst 420ms ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-balloon {
+    bottom: 10vh;
+    animation: none;
   }
-  50% {
-    transform: translateY(-16px) rotate(3deg);
+
+  .balloon-art-popped,
+  .balloon-burst i {
+    animation-duration: 1ms;
   }
 }
 

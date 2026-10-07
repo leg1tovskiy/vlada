@@ -319,7 +319,7 @@ export function MinecraftBook() {
     pageAudio.play();
     const openTimer = setTimeout(() => {
       setIsOpening(false);
-    }, 1700);
+    }, 1400);
 
     return () => {
       clearTimeout(openTimer);
@@ -405,7 +405,7 @@ export function MinecraftBook() {
   return (
     <div
       ref={bookContainerRef}
-      className="relative flex flex-col items-center justify-center p-2 sm:p-4 pt-8 sm:pt-12 transition-all select-none w-full"
+      className="relative flex flex-col items-center justify-center p-2 transition-all select-none w-full max-h-full"
     >
       {/* ── Атмосферный фон Minecraft: Хэллоуинское мистическое свечение и угольки ──── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
