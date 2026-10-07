@@ -319,7 +319,7 @@ export function MinecraftBook() {
   return (
     <div
       ref={bookContainerRef}
-      className="relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center p-3 sm:p-6 transition-all select-none overflow-hidden"
+      className="relative flex flex-col items-center justify-center p-2 sm:p-4 transition-all select-none w-full"
     >
       {/* ── Атмосферный фон Minecraft: Хэллоуинское мистическое свечение и угольки ──── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -335,21 +335,9 @@ export function MinecraftBook() {
         <div className="halloween-ember absolute top-2/3 left-1/3 size-1.5 rounded-full bg-purple-400/50 shadow-[0_0_8px_#c084fc]" style={{ animationDelay: "3.7s" }} />
       </div>
 
-      {/* ── Верхняя панель управления книгой ───────────────────────── */}
-      <div className="relative z-10 mb-4 flex flex-wrap items-center justify-between gap-3 w-full max-w-[584px] px-1">
+      {/* ── Панель управления книгой (кнопки сгруппированы слева, угол тыквы справа полностью свободен) ── */}
+      <div className="relative z-20 mb-8 sm:mb-10 flex items-center justify-between gap-3 w-full max-w-[560px] px-2">
         <div className="flex items-center gap-2">
-          <span className="flex size-7 items-center justify-center rounded-lg border border-orange-500/40 bg-orange-500/15 text-orange-400 shadow-sm text-sm">
-            🎃
-          </span>
-          <div>
-            <h2 className="text-xs sm:text-sm font-extrabold tracking-tight text-fg flex items-center gap-1.5 font-minecraft">
-              Книга для Влады <span className="text-[10px] text-orange-400/90 font-normal">🎃 Halloween</span>
-            </h2>
-            <p className="text-[10px] text-muted font-minecraft">Оригинальный интерфейс Minecraft</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1.5">
           {/* Кнопка оглавления */}
           <button
             type="button"
@@ -365,12 +353,20 @@ export function MinecraftBook() {
           <button
             type="button"
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className="mc-button grid size-7 place-items-center text-[11px] font-minecraft"
+            className="mc-button flex h-7 items-center gap-1.5 px-2.5 text-[11px] font-minecraft"
             title={soundEnabled ? "Выключить звук страниц" : "Включить звук страниц"}
             aria-label="Звук"
           >
             {soundEnabled ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
+            <span className="text-[10px] hidden sm:inline">{soundEnabled ? "Звук" : "Без звука"}</span>
           </button>
+        </div>
+
+        {/* Счётчик страниц слева от зоны тыквы */}
+        <div className="text-right pr-16 sm:pr-20">
+          <span className="text-xs text-white/60 font-minecraft">
+            Стр. <span className="text-orange-400 font-bold">{currentPage}</span> / {totalPages}
+          </span>
         </div>
       </div>
 
@@ -440,7 +436,7 @@ export function MinecraftBook() {
       <div className="relative z-10 flex items-center justify-center">
         {/* Контейнер книги с точными пропорциями 146 : 180 (4x масштаб = 584px x 720px) */}
         <div
-          className="relative aspect-[146/180] w-[min(92vw,584px)] max-h-[82vh] select-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] book-perspective"
+          className="relative aspect-[146/180] w-[min(92vw,540px)] max-h-[74vh] select-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] book-perspective"
           style={{ imageRendering: "pixelated" }}
         >
           {/* Базовая текстура книги из Minecraft 1 в 1 */}
@@ -455,8 +451,8 @@ export function MinecraftBook() {
           <div
             className="absolute z-40 pointer-events-auto select-none group"
             style={{
-              top: "-36px",
-              right: "-14px",
+              top: "-26px",
+              right: "-10px",
             }}
           >
             {/* Тень от тыквы на кожаном переплёте книги */}
@@ -476,11 +472,11 @@ export function MinecraftBook() {
                 src="/pixel-pumpkin.png"
                 alt="Halloween Jack-o'-lantern"
                 draggable={false}
-                className="w-20 sm:w-24 h-auto object-contain pixelated pointer-events-none"
+                className="w-18 sm:w-22 h-auto object-contain pixelated pointer-events-none"
                 style={{ imageRendering: "pixelated" }}
               />
-              {/* Всплывающая подсказка при наведении */}
-              <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap rounded-md bg-black/90 px-2 py-0.5 text-[10px] text-amber-300 font-minecraft border border-amber-500/40 shadow-lg">
+              {/* Всплывающая подсказка при наведении (без обрезки) */}
+              <div className="absolute -top-7 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap rounded-md bg-black/95 px-2.5 py-1 text-[11px] text-amber-300 font-minecraft border border-amber-500/50 shadow-2xl z-50">
                 Счастливого Хэллоуина! 🎃
               </div>
             </div>
