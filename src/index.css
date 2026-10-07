@@ -465,7 +465,6 @@ body {
   animation: flipFaceFrontToggle 0.5s linear forwards !important;
   backface-visibility: hidden !important;
   -webkit-backface-visibility: hidden !important;
-  background-color: #fbf2dc;
   transform: translateZ(1px);
   -webkit-transform: translateZ(1px);
 }
@@ -476,7 +475,6 @@ body {
   -webkit-backface-visibility: hidden !important;
   transform: rotateY(180deg) translateZ(1px);
   -webkit-transform: rotateY(180deg) translateZ(1px);
-  background-color: #fbf2dc;
 }
 
 .backface-hidden {
