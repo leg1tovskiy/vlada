@@ -89,7 +89,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between text-[#eef0f4] relative selection:bg-orange-500/30 selection:text-orange-200">
+    <div className="h-screen h-[100dvh] overflow-hidden flex flex-col justify-between text-[#eef0f4] relative selection:bg-orange-500/30 selection:text-orange-200">
       {/* Праздничные декорации по всей странице: шарики, хлопушки, тыквы */}
       <FestiveDecorations />
 
@@ -136,7 +136,7 @@ export function App() {
       </header>
 
       {/* Основное содержимое страницы */}
-      <main className="flex-1 flex flex-col items-center justify-center p-2 sm:p-4 relative">
+      <main className="flex-1 flex flex-col items-center justify-center p-2 sm:p-4 relative overflow-hidden">
         {isAllowed ? (
           <MinecraftBook />
         ) : isExpired ? (

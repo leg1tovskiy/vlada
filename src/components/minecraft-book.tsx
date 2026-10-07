@@ -133,7 +133,7 @@ export function MinecraftBook() {
   const [currentSpread, setCurrentSpread] = useState(1);
   const spreadRef = useRef(1);
 
-  // Анимация раскрытия книги при первом заходе (~2.5 сек)
+  // Анимация раскрытия книги при первом заходе (~1.7 сек, плавно без рывков)
   const [isOpening, setIsOpening] = useState(true);
 
   const flipIdRef = useRef(0);
@@ -144,21 +144,14 @@ export function MinecraftBook() {
   const [prevHover, setPrevHover] = useState(false);
   const bookContainerRef = useRef<HTMLDivElement>(null);
 
-  // Запуск анимации раскрытия книги и звука при входе
+  // Запуск плавной анимации раскрытия книги и звука при входе
   useEffect(() => {
-    // Звук перелистывания страниц при раскрытии
     pageAudio.play();
-    const soundTimer = setTimeout(() => {
-      pageAudio.play();
-    }, 1100);
-
-    // Окончание раскрытия через 2.5 секунды
     const openTimer = setTimeout(() => {
       setIsOpening(false);
-    }, 2500);
+    }, 1700);
 
     return () => {
-      clearTimeout(soundTimer);
       clearTimeout(openTimer);
     };
   }, []);
@@ -203,7 +196,7 @@ export function MinecraftBook() {
       flipTimerRef.current = window.setTimeout(() => {
         setFlipState(null);
         flipTimerRef.current = null;
-      }, 450);
+      }, 380);
     },
     [isOpening, totalSpreads],
   );
@@ -284,7 +277,7 @@ export function MinecraftBook() {
       {/* ── САМА ДВУХСТРАНИЧНАЯ КНИГА MINECRAFT (РАЗВОРОТ НА 2 СТРАНИЦЫ) ────── */}
       <div className="relative z-10 flex items-center justify-center w-full">
         <div
-          className="relative aspect-[292/180] w-[min(96vw,920px)] max-h-[75vh] select-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)]"
+          className="relative aspect-[292/180] w-[min(94vw,880px)] max-h-[min(520px,68vh)] select-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)]"
           style={{
             perspective: "1600px",
             transformStyle: "preserve-3d",
@@ -487,7 +480,7 @@ export function MinecraftBook() {
               ) : activeSpreadData.wish ? (
                 /* Поздравление на левой странице */
                 <div className="flex h-full flex-col justify-between text-black font-minecraft leading-[1.45]">
-                  <div className="overflow-y-auto overscroll-contain no-scrollbar pr-1">
+                  <div className="overflow-hidden pr-1">
                     {/* Шапка поздравления */}
                     <div className="flex items-center justify-between pb-1.5 border-b border-black/10">
                       <span
@@ -633,7 +626,7 @@ export function MinecraftBook() {
               {activeSpreadData.wish && activeSpreadData.wish.p2 ? (
                 /* Продолжение поздравления на 2 странице */
                 <div className="flex h-full flex-col justify-between text-black font-minecraft leading-[1.45]">
-                  <div className="overflow-y-auto overscroll-contain no-scrollbar pr-1">
+                  <div className="overflow-hidden pr-1">
                     <div className="flex items-center justify-between pb-1.5 border-b border-black/10">
                       <span
                         className="italic opacity-60 font-bold"
@@ -705,8 +698,8 @@ export function MinecraftBook() {
               key={`peel-${flipState.id}`}
               className={`absolute top-0 bottom-0 pointer-events-none overflow-hidden z-20 ${
                 flipState.direction === "forward"
-                  ? "right-0 w-1/2 mc-spread-turn-forward"
-                  : "left-0 w-1/2 mc-spread-turn-backward"
+                  ? "right-0 w-1/2 spread-peel-forward"
+                  : "left-0 w-1/2 spread-peel-backward"
               }`}
             >
               <div
