@@ -188,37 +188,151 @@ body {
   will-change: opacity, transform;
 }
 
-/* ── Плавное перелистывание страниц (строго внутри границ книги, без полос прокрутки) ── */
-@keyframes spreadTurnPeelForward {
+/* ── Плавное перелистывание страниц (Вперёд: справа налево; Назад: слева направо) ── */
+@keyframes spreadPeelForward {
   0% {
-    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
-    opacity: 1;
+    clip-path: polygon(0% 0%, 106% 0%, 102% 100%, 0% 100%);
   }
   100% {
-    clip-path: polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%);
-    opacity: 0.1;
+    clip-path: polygon(0% 0%, 0% 0%, -10% 100%, 0% 100%);
   }
 }
 
-@keyframes spreadTurnPeelBackward {
+@keyframes spreadPeelBackward {
   0% {
-    clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%);
-    opacity: 0.1;
+    clip-path: polygon(-6% 0%, 100% 0%, 100% 100%, -2% 100%);
   }
   100% {
-    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+    clip-path: polygon(100% 0%, 100% 0%, 110% 100%, 100% 100%);
+  }
+}
+
+@keyframes spreadCurlRibbonForward {
+  0% {
+    left: calc(100% - 18px);
+    opacity: 0.4;
+  }
+  15% {
     opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    left: -36px;
+    opacity: 0;
+  }
+}
+
+@keyframes spreadCurlRibbonBackward {
+  0% {
+    left: -36px;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    left: calc(100% - 18px);
+    opacity: 0.4;
+  }
+}
+
+@keyframes spreadCurlShadowForward {
+  0% {
+    left: calc(100% - 10px);
+    opacity: 0.2;
+  }
+  20% {
+    opacity: 0.6;
+  }
+  80% {
+    opacity: 0.5;
+  }
+  100% {
+    left: -30px;
+    opacity: 0;
+  }
+}
+
+@keyframes spreadCurlShadowBackward {
+  0% {
+    left: -30px;
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.5;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    left: calc(100% - 10px);
+    opacity: 0.2;
   }
 }
 
 .spread-peel-forward {
-  animation: spreadTurnPeelForward 0.38s cubic-bezier(0.25, 0.1, 0.25, 1) forwards !important;
-  will-change: clip-path, opacity;
+  animation: spreadPeelForward 0.44s cubic-bezier(0.25, 0.1, 0.25, 1) forwards !important;
+  will-change: clip-path;
 }
 
 .spread-peel-backward {
-  animation: spreadTurnPeelBackward 0.38s cubic-bezier(0.25, 0.1, 0.25, 1) forwards !important;
-  will-change: clip-path, opacity;
+  animation: spreadPeelBackward 0.44s cubic-bezier(0.25, 0.1, 0.25, 1) forwards !important;
+  will-change: clip-path;
+}
+
+.spread-curl-ribbon-forward {
+  animation: spreadCurlRibbonForward 0.44s cubic-bezier(0.25, 0.1, 0.25, 1) forwards !important;
+  will-change: left, opacity;
+  background: linear-gradient(
+    to right,
+    rgba(60, 35, 15, 0.35) 0%,
+    rgba(120, 80, 40, 0.18) 18%,
+    #fdf6e4 38%,
+    #ffffff 58%,
+    #fbf2dc 78%,
+    rgba(80, 45, 15, 0.28) 92%,
+    rgba(40, 20, 5, 0.5) 100%
+  );
+  box-shadow: 14px 0 24px -2px rgba(35, 18, 5, 0.45),
+              24px 0 38px -4px rgba(25, 12, 3, 0.3);
+  transform: skewY(-2.5deg) scaleY(1.02);
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+}
+
+.spread-curl-ribbon-backward {
+  animation: spreadCurlRibbonBackward 0.44s cubic-bezier(0.25, 0.1, 0.25, 1) forwards !important;
+  will-change: left, opacity;
+  background: linear-gradient(
+    to right,
+    rgba(40, 20, 5, 0.5) 0%,
+    rgba(80, 45, 15, 0.28) 8%,
+    #fbf2dc 22%,
+    #ffffff 42%,
+    #fdf6e4 62%,
+    rgba(120, 80, 40, 0.18) 82%,
+    rgba(60, 35, 15, 0.35) 100%
+  );
+  box-shadow: -14px 0 24px -2px rgba(35, 18, 5, 0.45),
+              -24px 0 38px -4px rgba(25, 12, 3, 0.3);
+  transform: skewY(2.5deg) scaleY(1.02);
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+}
+
+.spread-curl-shadow-forward {
+  animation: spreadCurlShadowForward 0.44s cubic-bezier(0.25, 0.1, 0.25, 1) forwards !important;
+  will-change: left, opacity;
+  background: linear-gradient(to right, rgba(40, 20, 5, 0.38) 0%, rgba(40, 20, 5, 0) 100%);
+}
+
+.spread-curl-shadow-backward {
+  animation: spreadCurlShadowBackward 0.44s cubic-bezier(0.25, 0.1, 0.25, 1) forwards !important;
+  will-change: left, opacity;
+  background: linear-gradient(to left, rgba(40, 20, 5, 0.38) 0%, rgba(40, 20, 5, 0) 100%);
 }
 
 /* ── Halloween Spooky Effects ────────────────────────────────────────── */

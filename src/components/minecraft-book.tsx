@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { VLADA_INTRO, VLADA_WISHES, type VladaWishItem } from "@/data/vlada-wishes";
 
 /**
@@ -120,6 +120,295 @@ export function processWishSpread(wish: VladaWishItem, maxChars = 320): Processe
   };
 }
 
+/**
+ * Компонент Левой Страницы разворота (Страница 1)
+ */
+function LeftPage({
+  spreadIndex,
+  totalSpreads,
+  isOpening = false,
+}: {
+  spreadIndex: number;
+  totalSpreads: number;
+  isOpening?: boolean;
+}) {
+  const isIntro = spreadIndex === 1;
+  const wish = !isIntro ? processWishSpread(VLADA_WISHES[spreadIndex - 2]) : null;
+
+  return (
+    <>
+      {/* Текстура левой половины книги: симметрично отражена (-scale-x-100), красный шов у корешка */}
+      <img
+        src="/book-bg-4x.png"
+        alt="Minecraft Book Left Page"
+        draggable={false}
+        className="absolute inset-0 size-full object-fill pixelated pointer-events-none -scale-x-100"
+      />
+
+      {/* Паутинка в левом верхнем углу пергамента */}
+      <img
+        src="/cobweb.png"
+        alt=""
+        draggable={false}
+        className="absolute z-15 pointer-events-none select-none pixelated mix-blend-multiply opacity-35"
+        style={{
+          top: "6.2%",
+          left: "9.6%",
+          width: "clamp(28px, 6.5%, 44px)",
+          aspectRatio: "1/1",
+        }}
+      />
+
+      {/* Номер страницы / заголовок слева вверху (Page X of Y) */}
+      <div
+        className={`absolute z-20 pointer-events-none text-black font-minecraft text-left font-normal ${
+          isOpening ? "book-content-reveal" : ""
+        }`}
+        style={{
+          top: "7.9%",
+          left: "12%",
+          fontSize: "clamp(11px, 1.8vw, 15px)",
+          lineHeight: 1,
+        }}
+      >
+        Page {spreadIndex} of {totalSpreads}
+      </div>
+
+      {/* Содержимое левой страницы */}
+      <div
+        className={`absolute z-15 flex flex-col justify-between overflow-hidden ${
+          isOpening ? "book-content-reveal" : ""
+        }`}
+        style={{
+          top: "14%",
+          left: "12%",
+          right: "14%",
+          bottom: "14%",
+        }}
+      >
+        {isIntro ? (
+          /* Вступительный лист на левой странице */
+          <div className="flex h-full flex-col justify-between text-black font-minecraft leading-[1.4]">
+            <div>
+              <div className="text-center pb-2 border-b-2 border-black/15">
+                <h3
+                  className="font-bold text-black"
+                  style={{ fontSize: "clamp(15px, 2.4vw, 21px)" }}
+                >
+                  {VLADA_INTRO.title}
+                </h3>
+                <p
+                  className="text-black/70 mt-0.5"
+                  style={{ fontSize: "clamp(10px, 1.6vw, 13px)" }}
+                >
+                  {VLADA_INTRO.subtitle}
+                </p>
+              </div>
+
+              <div className="mt-3">
+                {VLADA_INTRO.paragraphs.length > 0 && (
+                  <p
+                    className="font-bold text-black pb-1.5 leading-snug"
+                    style={{ fontSize: "clamp(13px, 2vw, 17px)" }}
+                  >
+                    {VLADA_INTRO.paragraphs[0]}
+                  </p>
+                )}
+
+                <div
+                  className="space-y-2 text-black/95 font-normal"
+                  style={{ fontSize: "clamp(11.5px, 1.7vw, 14.5px)", lineHeight: "1.4" }}
+                >
+                  {VLADA_INTRO.paragraphs.slice(1).map((p, i) => (
+                    <p key={i} className="leading-snug">
+                      {p}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Подпись команды внизу левой страницы */}
+            {VLADA_INTRO.signature ? (
+              <div className="pt-2 text-right pr-2 text-black font-bold">
+                <p
+                  className="italic opacity-90 inline-flex items-center justify-end gap-1.5"
+                  style={{ fontSize: "clamp(11px, 1.6vw, 14px)" }}
+                >
+                  {VLADA_INTRO.signature.includes("❤️") || VLADA_INTRO.signature.includes("❤") ? (
+                    <>
+                      <span>{VLADA_INTRO.signature.replace(/[❤️❤]/g, "").trim()}</span>
+                      <span className="not-italic text-[#dc2626] inline-block font-sans text-[1.15em] leading-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]">
+                        ❤️
+                      </span>
+                    </>
+                  ) : (
+                    VLADA_INTRO.signature
+                  )}
+                </p>
+              </div>
+            ) : null}
+          </div>
+        ) : wish ? (
+          /* Поздравление на левой странице */
+          <div className="flex h-full flex-col justify-between text-black font-minecraft leading-[1.45]">
+            <div className="overflow-hidden pr-1">
+              {/* Шапка поздравления */}
+              <div className="flex items-center justify-between pb-1.5 border-b border-black/10">
+                <span
+                  className="font-bold text-black/80 flex items-center gap-1"
+                  style={{ fontSize: "clamp(11px, 1.7vw, 14px)" }}
+                >
+                  <span>Поздравление #{wish.id}</span>
+                </span>
+                {wish.date ? (
+                  <span
+                    className="text-black/50"
+                    style={{ fontSize: "clamp(9px, 1.4vw, 11px)" }}
+                  >
+                    {wish.date}
+                  </span>
+                ) : null}
+              </div>
+
+              {/* Текст первой части (или полный текст, если поздравление поместилось на 1 страницу) */}
+              <div
+                className="mt-2.5 text-black font-normal whitespace-pre-wrap leading-relaxed"
+                style={{ fontSize: "clamp(12px, 1.8vw, 15px)", lineHeight: "1.45" }}
+              >
+                {wish.p1}
+              </div>
+            </div>
+
+            {/* Подпись на левой странице: отображается ТОЛЬКО если поздравление закончилось на 1 странице */}
+            {wish.signatureOnPage === 1 ? (
+              <div className="pt-2 text-right pr-2">
+                <p
+                  className="font-bold text-black"
+                  style={{ fontSize: "clamp(12px, 1.8vw, 15px)" }}
+                >
+                  — {wish.author}
+                </p>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </>
+  );
+}
+
+/**
+ * Компонент Правой Страницы разворота (Страница 2)
+ */
+function RightPage({
+  spreadIndex,
+  isOpening = false,
+}: {
+  spreadIndex: number;
+  totalSpreads: number;
+  isOpening?: boolean;
+}) {
+  const isIntro = spreadIndex === 1;
+  const wish = !isIntro ? processWishSpread(VLADA_WISHES[spreadIndex - 2]) : null;
+
+  return (
+    <>
+      {/* Текстура правой половины книги: стандартное положение, красный шов у корешка слева */}
+      <img
+        src="/book-bg-4x.png"
+        alt="Minecraft Book Right Page"
+        draggable={false}
+        className="absolute inset-0 size-full object-fill pixelated pointer-events-none"
+      />
+
+      {/* Паутинка в нижнем правом углу пергамента */}
+      <img
+        src="/cobweb.png"
+        alt=""
+        draggable={false}
+        className="absolute z-15 pointer-events-none select-none pixelated mix-blend-multiply opacity-25 -scale-x-100 -scale-y-100"
+        style={{
+          bottom: "9.8%",
+          right: "8.6%",
+          width: "clamp(24px, 5.5%, 36px)",
+          aspectRatio: "1/1",
+        }}
+      />
+
+      {/* Заголовок правой страницы: отображается ТОЛЬКО если на 2 странице есть продолжение */}
+      {wish && wish.p2 ? (
+        <div
+          className={`absolute z-20 pointer-events-none text-black font-minecraft text-right font-normal ${
+            isOpening ? "book-content-reveal" : ""
+          }`}
+          style={{
+            top: "7.9%",
+            right: "12%",
+            fontSize: "clamp(11px, 1.8vw, 15px)",
+            lineHeight: 1,
+          }}
+        >
+          Page {spreadIndex}
+        </div>
+      ) : null}
+
+      {/* 
+        СОДЕРЖИМОЕ ПРАВОЙ СТРАНИЦЫ:
+        Если поздравление маленькое и поместилось на 1 страницу — 2 страница ПУСТУЕТ (чистый пергамент).
+        Если поздравление не вместилось — на 2 страницу переходит продолжение и ставится подпись автора!
+      */}
+      <div
+        className={`absolute z-15 flex flex-col justify-between overflow-hidden ${
+          isOpening ? "book-content-reveal" : ""
+        }`}
+        style={{
+          top: "14%",
+          left: "14%",
+          right: "12%",
+          bottom: "14%",
+        }}
+      >
+        {wish && wish.p2 ? (
+          /* Продолжение поздравления на 2 странице */
+          <div className="flex h-full flex-col justify-between text-black font-minecraft leading-[1.45]">
+            <div className="overflow-hidden pr-1">
+              <div className="flex items-center justify-between pb-1.5 border-b border-black/10">
+                <span
+                  className="italic opacity-60 font-bold"
+                  style={{ fontSize: "clamp(10px, 1.6vw, 13px)" }}
+                >
+                  (продолжение)
+                </span>
+              </div>
+
+              <div
+                className="mt-2.5 text-black font-normal whitespace-pre-wrap leading-relaxed"
+                style={{ fontSize: "clamp(12px, 1.8vw, 15px)", lineHeight: "1.45" }}
+              >
+                {wish.p2}
+              </div>
+            </div>
+
+            {/* Подпись на правой странице: текст закончился на 2 странице, поэтому подпись здесь! */}
+            <div className="pt-2 text-right pr-2">
+              <p
+                className="font-bold text-black"
+                style={{ fontSize: "clamp(12px, 1.8vw, 15px)" }}
+              >
+                — {wish.author}
+              </p>
+            </div>
+          </div>
+        ) : (
+          /* 2 СТРАНИЦА ПУСТУЕТ: поздравление маленькое, чистый лист пергамента! */
+          <div className="size-full" />
+        )}
+      </div>
+    </>
+  );
+}
+
 type FlipState = {
   id: number;
   fromSpread: number;
@@ -196,7 +485,7 @@ export function MinecraftBook() {
       flipTimerRef.current = window.setTimeout(() => {
         setFlipState(null);
         flipTimerRef.current = null;
-      }, 380);
+      }, 440);
     },
     [isOpening, totalSpreads],
   );
@@ -229,28 +518,10 @@ export function MinecraftBook() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [flipTo, nextSpread, prevSpread, totalSpreads]);
 
-  // Подготовка данных для текущего разворота
-  const activeSpreadData = useMemo(() => {
-    const spreadIndex = currentSpread;
-    const isIntro = spreadIndex === 1;
-    if (isIntro) {
-      return {
-        isIntro: true,
-        wish: null,
-      };
-    }
-    const wish = VLADA_WISHES[spreadIndex - 2];
-    const processed = processWishSpread(wish);
-    return {
-      isIntro: false,
-      wish: processed,
-    };
-  }, [currentSpread]);
-
   return (
     <div
       ref={bookContainerRef}
-      className="relative flex flex-col items-center justify-center p-2 sm:p-4 pt-10 sm:pt-14 transition-all select-none w-full"
+      className="relative flex flex-col items-center justify-center p-2 sm:p-4 pt-8 sm:pt-12 transition-all select-none w-full"
     >
       {/* ── Атмосферный фон Minecraft: Хэллоуинское мистическое свечение и угольки ──── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -354,7 +625,7 @@ export function MinecraftBook() {
 
           {/* ── СВЕТОВОЙ ЭФФЕКТ ИЗГИБА КОРЕШКА ВО ВРЕМЯ РАСКРЫТИЯ КНИГИ ────── */}
           {isOpening && (
-            <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-20 pointer-events-none z-35 book-spine-glow bg-radial from-amber-400/90 via-orange-500/40 to-transparent" />
+            <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-16 pointer-events-none z-35 book-spine-glow bg-radial from-amber-400/90 via-orange-500/40 to-transparent" />
           )}
 
           {/* ── ЛЕВАЯ СТРАНИЦА РАЗВОРОТА (СТРАНИЦА 1) ────────────────────────── */}
@@ -364,167 +635,11 @@ export function MinecraftBook() {
             }`}
             style={{ zIndex: 10 }}
           >
-            {/* Текстура левой половины книги: симметрично отражена (-scale-x-100), красный шов у корешка */}
-            <img
-              src="/book-bg-4x.png"
-              alt="Minecraft Book Left Page"
-              draggable={false}
-              className="absolute inset-0 size-full object-fill pixelated pointer-events-none -scale-x-100"
+            <LeftPage
+              spreadIndex={currentSpread}
+              totalSpreads={totalSpreads}
+              isOpening={isOpening}
             />
-
-            {/* Паутинка в левом верхнем углу пергамента */}
-            <img
-              src="/cobweb.png"
-              alt=""
-              draggable={false}
-              className="absolute z-15 pointer-events-none select-none pixelated mix-blend-multiply opacity-35"
-              style={{
-                top: "6.2%",
-                left: "9.6%",
-                width: "clamp(28px, 6.5%, 44px)",
-                aspectRatio: "1/1",
-              }}
-            />
-
-            {/* Номер страницы / заголовок слева вверху (Page X of Y) */}
-            <div
-              className={`absolute z-20 pointer-events-none text-black font-minecraft text-left font-normal ${
-                isOpening ? "book-content-reveal" : ""
-              }`}
-              style={{
-                top: "7.9%",
-                left: "12%",
-                fontSize: "clamp(11px, 1.8vw, 15px)",
-                lineHeight: 1,
-              }}
-            >
-              Page {currentSpread} of {totalSpreads}
-            </div>
-
-            {/* Содержимое левой страницы */}
-            <div
-              className={`absolute z-15 flex flex-col justify-between overflow-hidden ${
-                isOpening ? "book-content-reveal" : ""
-              }`}
-              style={{
-                top: "14%",
-                left: "12%",
-                right: "14%",
-                bottom: "14%",
-              }}
-            >
-              {activeSpreadData.isIntro ? (
-                /* Вступительный лист на левой странице */
-                <div className="flex h-full flex-col justify-between text-black font-minecraft leading-[1.4]">
-                  <div>
-                    <div className="text-center pb-2 border-b-2 border-black/15">
-                      <h3
-                        className="font-bold text-black"
-                        style={{ fontSize: "clamp(15px, 2.4vw, 21px)" }}
-                      >
-                        {VLADA_INTRO.title}
-                      </h3>
-                      <p
-                        className="text-black/70 mt-0.5"
-                        style={{ fontSize: "clamp(10px, 1.6vw, 13px)" }}
-                      >
-                        {VLADA_INTRO.subtitle}
-                      </p>
-                    </div>
-
-                    <div className="mt-3">
-                      {VLADA_INTRO.paragraphs.length > 0 && (
-                        <p
-                          className="font-bold text-black pb-1.5 leading-snug"
-                          style={{ fontSize: "clamp(13px, 2vw, 17px)" }}
-                        >
-                          {VLADA_INTRO.paragraphs[0]}
-                        </p>
-                      )}
-
-                      <div
-                        className="space-y-2 text-black/95 font-normal"
-                        style={{ fontSize: "clamp(11.5px, 1.7vw, 14.5px)", lineHeight: "1.4" }}
-                      >
-                        {VLADA_INTRO.paragraphs.slice(1).map((p, i) => (
-                          <p key={i} className="leading-snug">
-                            {p}
-                          </p>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Подпись команды внизу левой страницы */}
-                  {VLADA_INTRO.signature ? (
-                    <div className="pt-2 text-right pr-2 text-black font-bold">
-                      <p
-                        className="italic opacity-90 inline-flex items-center justify-end gap-1.5"
-                        style={{ fontSize: "clamp(11px, 1.6vw, 14px)" }}
-                      >
-                        {VLADA_INTRO.signature.includes("❤️") ||
-                        VLADA_INTRO.signature.includes("❤") ? (
-                          <>
-                            <span>{VLADA_INTRO.signature.replace(/[❤️❤]/g, "").trim()}</span>
-                            <span className="not-italic text-[#dc2626] inline-block font-sans text-[1.15em] leading-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]">
-                              ❤️
-                            </span>
-                          </>
-                        ) : (
-                          VLADA_INTRO.signature
-                        )}
-                      </p>
-                    </div>
-                  ) : null}
-                </div>
-              ) : activeSpreadData.wish ? (
-                /* Поздравление на левой странице */
-                <div className="flex h-full flex-col justify-between text-black font-minecraft leading-[1.45]">
-                  <div className="overflow-hidden pr-1">
-                    {/* Шапка поздравления */}
-                    <div className="flex items-center justify-between pb-1.5 border-b border-black/10">
-                      <span
-                        className="font-bold text-black/80 flex items-center gap-1"
-                        style={{ fontSize: "clamp(11px, 1.7vw, 14px)" }}
-                      >
-                        <span>Поздравление #{activeSpreadData.wish.id}</span>
-                      </span>
-                      {activeSpreadData.wish.date ? (
-                        <span
-                          className="text-black/50"
-                          style={{ fontSize: "clamp(9px, 1.4vw, 11px)" }}
-                        >
-                          {activeSpreadData.wish.date}
-                        </span>
-                      ) : null}
-                    </div>
-
-                    {/* Текст первой части (или полный текст, если поздравление поместилось на 1 страницу) */}
-                    <div
-                      className="mt-2.5 text-black font-normal whitespace-pre-wrap leading-relaxed"
-                      style={{ fontSize: "clamp(12px, 1.8vw, 15px)", lineHeight: "1.45" }}
-                    >
-                      {activeSpreadData.wish.p1}
-                    </div>
-                  </div>
-
-                  {/* 
-                    ПОДПИСЬ НА ЛЕВОЙ СТРАНИЦЕ:
-                    Отображается ТОЛЬКО если поздравление закончилось на 1 странице!
-                  */}
-                  {activeSpreadData.wish.signatureOnPage === 1 ? (
-                    <div className="pt-2 text-right pr-2">
-                      <p
-                        className="font-bold text-black"
-                        style={{ fontSize: "clamp(12px, 1.8vw, 15px)" }}
-                      >
-                        — {activeSpreadData.wish.author}
-                      </p>
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
-            </div>
 
             {/* Кнопка перехода к предыдущему развороту (на левой странице) */}
             {currentSpread > 1 ? (
@@ -554,7 +669,7 @@ export function MinecraftBook() {
 
           {/* ── ЦЕНТРАЛЬНЫЙ СГИБ КОРЕШКА (РЕАЛИСТИЧНЫЙ ОБЪЕМНЫЙ ШОВ) ──────────── */}
           <div
-            className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-6 pointer-events-none z-25"
+            className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-6 pointer-events-none z-20"
             style={{
               background:
                 "linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(20,10,5,0.28) 35%, rgba(10,5,2,0.6) 50%, rgba(20,10,5,0.28) 65%, rgba(0,0,0,0) 100%)",
@@ -568,103 +683,11 @@ export function MinecraftBook() {
             }`}
             style={{ zIndex: 10 }}
           >
-            {/* Текстура правой половины книги: стандартное положение, красный шов у корешка слева */}
-            <img
-              src="/book-bg-4x.png"
-              alt="Minecraft Book Right Page"
-              draggable={false}
-              className="absolute inset-0 size-full object-fill pixelated pointer-events-none"
+            <RightPage
+              spreadIndex={currentSpread}
+              totalSpreads={totalSpreads}
+              isOpening={isOpening}
             />
-
-            {/* Паутинка в нижнем правом углу пергамента */}
-            <img
-              src="/cobweb.png"
-              alt=""
-              draggable={false}
-              className="absolute z-15 pointer-events-none select-none pixelated mix-blend-multiply opacity-25 -scale-x-100 -scale-y-100"
-              style={{
-                bottom: "9.8%",
-                right: "8.6%",
-                width: "clamp(24px, 5.5%, 36px)",
-                aspectRatio: "1/1",
-              }}
-            />
-
-            {/* Заголовок правой страницы: отображается ТОЛЬКО если на 2 странице есть продолжение */}
-            {activeSpreadData.wish && activeSpreadData.wish.p2 ? (
-              <div
-                className={`absolute z-20 pointer-events-none text-black font-minecraft text-right font-normal ${
-                  isOpening ? "book-content-reveal" : ""
-                }`}
-                style={{
-                  top: "7.9%",
-                  right: "12%",
-                  fontSize: "clamp(11px, 1.8vw, 15px)",
-                  lineHeight: 1,
-                }}
-              >
-                Page {currentSpread}
-              </div>
-            ) : null}
-
-            {/* 
-              СОДЕРЖИМОЕ ПРАВОЙ СТРАНИЦЫ:
-              Если поздравление маленькое и поместилось на 1 страницу — 2 страница ПУСТУЕТ (чистый пергамент).
-              Если поздравление не вместилось — на 2 страницу переходит продолжение и ставится подпись автора!
-            */}
-            <div
-              className={`absolute z-15 flex flex-col justify-between overflow-hidden ${
-                isOpening ? "book-content-reveal" : ""
-              }`}
-              style={{
-                top: "14%",
-                left: "14%",
-                right: "12%",
-                bottom: "14%",
-              }}
-            >
-              {activeSpreadData.wish && activeSpreadData.wish.p2 ? (
-                /* Продолжение поздравления на 2 странице */
-                <div className="flex h-full flex-col justify-between text-black font-minecraft leading-[1.45]">
-                  <div className="overflow-hidden pr-1">
-                    <div className="flex items-center justify-between pb-1.5 border-b border-black/10">
-                      <span
-                        className="italic opacity-60 font-bold"
-                        style={{ fontSize: "clamp(10px, 1.6vw, 13px)" }}
-                      >
-                        (продолжение)
-                      </span>
-                    </div>
-
-                    <div
-                      className="mt-2.5 text-black font-normal whitespace-pre-wrap leading-relaxed"
-                      style={{ fontSize: "clamp(12px, 1.8vw, 15px)", lineHeight: "1.45" }}
-                    >
-                      {activeSpreadData.wish.p2}
-                    </div>
-                  </div>
-
-                  {/* 
-                    ПОДПИСЬ НА ПРАВОЙ СТРАНИЦЕ:
-                    Текст закончился на 2 странице, поэтому подпись отображается здесь!
-                  */}
-                  <div className="pt-2 text-right pr-2">
-                    <p
-                      className="font-bold text-black"
-                      style={{ fontSize: "clamp(12px, 1.8vw, 15px)" }}
-                    >
-                      — {activeSpreadData.wish.author}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                /* 
-                  2 СТРАНИЦА ПУСТУЕТ:
-                  Поздравление маленькое, ничего не рендерится — чистый лист пергамента!
-                */
-                <div className="size-full" />
-              )}
-            </div>
 
             {/* Кнопка перехода к следующему развороту (на правой странице) */}
             {currentSpread < totalSpreads ? (
@@ -692,23 +715,53 @@ export function MinecraftBook() {
             ) : null}
           </div>
 
-          {/* ── АНИМАЦИЯ ПЕРЕЛИСТЫВАНИЯ СТРАНИЦ ПРИ НАВИГАЦИИ ────────────────── */}
-          {flipState && (
+          {/* ── АУТЕНТИЧНОЕ ПЕРЕЛИСТЫВАНИЕ СТРАНИЦ MINECRAFT (В РАЗНЫЕ СТОРОНЫ) ── */}
+          {/* ВПЕРЁД: Правая страница уходящего разворота отгибается СПРАВА НАЛЕВО */}
+          {flipState && flipState.direction === "forward" && (
             <div
-              key={`peel-${flipState.id}`}
-              className={`absolute top-0 bottom-0 pointer-events-none overflow-hidden z-20 ${
-                flipState.direction === "forward"
-                  ? "right-0 w-1/2 spread-peel-forward"
-                  : "left-0 w-1/2 spread-peel-backward"
-              }`}
+              key={`peel-forward-${flipState.id}`}
+              className="absolute top-0 bottom-0 right-0 w-1/2 pointer-events-none overflow-hidden z-25 spread-peel-forward"
             >
+              <RightPage
+                spreadIndex={flipState.fromSpread}
+                totalSpreads={totalSpreads}
+              />
+
+              {/* Мягкая бегущая тень по открывающемуся листу (справа налево) */}
               <div
-                className="absolute inset-0 size-full"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #fcf4e3 0%, #fffbee 40%, #fcf4e2 75%, #f6ebd2 100%)",
-                  boxShadow: "inset 0 0 10px rgba(180, 140, 90, 0.25)",
-                }}
+                className="absolute top-0 bottom-0 pointer-events-none spread-curl-shadow-forward"
+                style={{ width: "24px" }}
+              />
+
+              {/* 3D-гребень изгиба перелистываемого листа пергамента (справа налево) */}
+              <div
+                className="absolute top-0 bottom-0 pointer-events-none spread-curl-ribbon-forward"
+                style={{ width: "36px" }}
+              />
+            </div>
+          )}
+
+          {/* НАЗАД: Левая страница уходящего разворота отгибается СЛЕВА НАПРАВО */}
+          {flipState && flipState.direction === "backward" && (
+            <div
+              key={`peel-backward-${flipState.id}`}
+              className="absolute top-0 bottom-0 left-0 w-1/2 pointer-events-none overflow-hidden z-25 spread-peel-backward"
+            >
+              <LeftPage
+                spreadIndex={flipState.fromSpread}
+                totalSpreads={totalSpreads}
+              />
+
+              {/* Мягкая бегущая тень по открывающемуся листу (слева направо) */}
+              <div
+                className="absolute top-0 bottom-0 pointer-events-none spread-curl-shadow-backward"
+                style={{ width: "24px" }}
+              />
+
+              {/* 3D-гребень изгиба перелистываемого листа пергамента (слева направо) */}
+              <div
+                className="absolute top-0 bottom-0 pointer-events-none spread-curl-ribbon-backward"
+                style={{ width: "36px" }}
               />
             </div>
           )}
