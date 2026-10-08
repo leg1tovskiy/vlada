@@ -179,11 +179,11 @@ function LeftPageContent({
               className="italic opacity-90 inline-flex items-center justify-end gap-1.5"
               style={{ fontSize: "clamp(11px, 1.6vw, 14px)" }}
             >
-              {VLADA_INTRO.signature.includes("❤️") || VLADA_INTRO.signature.includes("❤") ? (
+              {/[❤️❤💗]/.test(VLADA_INTRO.signature) ? (
                 <>
-                  <span>{VLADA_INTRO.signature.replace(/[❤️❤]/g, "").trim()}</span>
-                  <span className="not-italic text-[#dc2626] inline-block font-sans text-[1.15em] leading-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]">
-                    ❤️
+                  <span>{VLADA_INTRO.signature.replace(/[❤️❤💗]/g, "").trim()}</span>
+                  <span className="not-italic inline-block font-sans text-[1.15em] leading-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]">
+                    {VLADA_INTRO.signature.includes("💗") ? "💗" : "❤️"}
                   </span>
                 </>
               ) : (

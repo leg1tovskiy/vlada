@@ -101,7 +101,7 @@ export function App() {
           <span className="text-xl select-none" role="img" aria-label="Pumpkin">🎃</span>
           <div>
             <h1 className="text-sm font-bold tracking-wide font-minecraft flex items-center gap-2">
-              <span>FearProject & premute</span>
+              <span>Сделано с любовью твоими друзьями 💗</span>
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 font-sans">
                 Halloween Edition
               </span>
@@ -276,7 +276,7 @@ export function App() {
 
       {/* Подвал сайта */}
       <footer className="relative z-30 py-3 px-4 border-t border-white/10 bg-black/30 text-center font-minecraft text-[10px] text-white/40 flex flex-wrap items-center justify-between gap-2">
-        <span>Сделано с любовью командой FearProject & premute ❤️</span>
+        <span>Сделано с любовью твоими друзьями 💗</span>
         <div className="flex items-center gap-3">
           <span>14—15 октября 2026</span>
         </div>
