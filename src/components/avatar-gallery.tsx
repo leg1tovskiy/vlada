@@ -6,11 +6,16 @@ const avatarFiles = import.meta.glob("../avatar/*.{png,jpg,jpeg,webp,gif}", {
   import: "default",
 }) as Record<string, string>;
 
+const NICK_OVERRIDES: Record<string, string> = {
+  Discord_IKxQzyE7Js: "люблю викусю",
+};
+
 const avatars = Object.entries(avatarFiles)
-  .map(([path, src]) => ({
-    nick: path.split("/").pop()!.replace(/\.[^.]+$/, ""),
-    src,
-  }))
+  .map(([path, src]) => {
+    const rawNick = path.split("/").pop()!.replace(/\.[^.]+$/, "");
+    const nick = NICK_OVERRIDES[rawNick] || rawNick;
+    return { nick, src };
+  })
   .sort((a, b) => a.nick.localeCompare(b.nick, "ru", { sensitivity: "base" }));
 
 // 35 гармоничных позиций на десктопе вокруг таймера (по 15 по бокам + 5 сверху/снизу)
