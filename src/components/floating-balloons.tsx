@@ -1,5 +1,8 @@
-import { useEffect, useState } from "react";
-import type { CSSProperties } from "react";
+import { useEffect, useState, useCallback } from "react";
+import type { CSSProperties, MouseEvent } from "react";
+import { getRandomMinecraftItem } from "@/data/minecraft-items";
+import type { MinecraftItem } from "@/data/minecraft-items";
+import { playBalloonPopSound } from "@/utils/balloon-sound";
 
 const colors = [
   { body: "#ea580c", light: "#fdba74", knot: "#c2410c" },
@@ -24,7 +27,22 @@ function newFlight(id: number, initial: boolean) {
   };
 }
 
-function FloatingBalloon() {
+interface DroppedItem {
+  id: number;
+  item: MinecraftItem;
+  startX: number;
+  startY: number;
+  driftX: number;
+  rotation: number;
+  duration: number;
+  size: number;
+}
+
+interface FloatingBalloonProps {
+  onPop: (x: number, y: number) => void;
+}
+
+function FloatingBalloon({ onPop }: FloatingBalloonProps) {
   const [flight, setFlight] = useState(() => newFlight(0, true));
   const [popped, setPopped] = useState(false);
 
@@ -36,6 +54,15 @@ function FloatingBalloon() {
     }, 480);
     return () => window.clearTimeout(timeout);
   }, [popped]);
+
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    if (popped) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height * 0.35;
+    setPopped(true);
+    onPop(centerX, centerY);
+  };
 
   const style = {
     left: `${flight.left}%`,
@@ -55,7 +82,7 @@ function FloatingBalloon() {
       aria-label="Лопнуть шарик"
       className="floating-balloon"
       style={style}
-      onClick={() => setPopped(true)}
+      onClick={handleClick}
       onAnimationEnd={(event) => {
         if (event.target === event.currentTarget && event.animationName === "balloonRise" && !popped) {
           setFlight((previous) => newFlight(previous.id + 1, false));
@@ -89,10 +116,71 @@ function FloatingBalloon() {
   );
 }
 
+let nextDropId = 1;
+
 export function FloatingBalloons() {
+  const [droppedItems, setDroppedItems] = useState<DroppedItem[]>([]);
+
+  const handlePop = useCallback((x: number, y: number) => {
+    playBalloonPopSound();
+    const randomItem = getRandomMinecraftItem();
+    const drop: DroppedItem = {
+      id: nextDropId++,
+      item: randomItem,
+      startX: x,
+      startY: y,
+      driftX: randomBetween(-45, 45),
+      rotation: randomBetween(-120, 120),
+      duration: randomBetween(1.3, 1.7),
+      size: randomBetween(42, 52),
+    };
+    setDroppedItems((prev) => [...prev, drop]);
+  }, []);
+
+  const handleItemAnimationEnd = useCallback((id: number) => {
+    setDroppedItems((prev) => prev.filter((item) => item.id !== id));
+  }, []);
+
   return (
-    <div className="pointer-events-none fixed inset-0 z-10 overflow-hidden" aria-label="Летающие шарики">
-      {Array.from({ length: 10 }, (_, index) => <FloatingBalloon key={index} />)}
-    </div>
+    <>
+      <div className="pointer-events-none fixed inset-0 z-10 overflow-hidden" aria-label="Летающие шарики">
+        {Array.from({ length: 10 }, (_, index) => (
+          <FloatingBalloon key={index} onPop={handlePop} />
+        ))}
+      </div>
+
+      {droppedItems.length > 0 && (
+        <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden" aria-hidden="true">
+          {droppedItems.map((drop) => {
+            const style = {
+              left: `${drop.startX}px`,
+              top: `${drop.startY}px`,
+              width: `${drop.size}px`,
+              height: `${drop.size}px`,
+              "--start-x": `${drop.startX}px`,
+              "--start-y": `${drop.startY}px`,
+              "--drift-x": `${drop.driftX}px`,
+              "--item-rot": `${drop.rotation}deg`,
+              "--fall-duration": `${drop.duration}s`,
+            } as CSSProperties;
+
+            return (
+              <div
+                key={drop.id}
+                className="minecraft-dropped-item"
+                style={style}
+                onAnimationEnd={() => handleItemAnimationEnd(drop.id)}
+              >
+                <img
+                  src={`/mc-items/${drop.item.file}`}
+                  alt={drop.item.name}
+                  draggable={false}
+                />
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </>
   );
 }

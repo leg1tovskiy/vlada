@@ -4,7 +4,7 @@ export function VladaBadge() {
   return (
     <div className="vlada-badge relative z-20">
       <img src={vladaAvatar} alt="Аватар Влады" className="vlada-badge-avatar" />
-      <span className="vlada-badge-name font-minecraft">Влада</span>
+      <span className="vlada-badge-name font-minecraft">Влада (именинница)</span>
     </div>
   );
 }

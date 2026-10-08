@@ -625,6 +625,44 @@ body {
   animation: balloonBurst 420ms ease-out forwards;
 }
 
+/* ── Выпадение предметов Minecraft из лопнувшего шарика ── */
+@keyframes minecraftItemDrop {
+  0% {
+    transform: translate(-50%, -50%) translate3d(0, 0, 0) scale(0.4) rotate(0deg);
+    opacity: 1;
+  }
+  15% {
+    transform: translate(-50%, -50%) translate3d(calc(var(--drift-x) * 0.25), -28px, 0) scale(1.15) rotate(calc(var(--item-rot) * 0.25));
+    opacity: 1;
+  }
+  30% {
+    transform: translate(-50%, -50%) translate3d(calc(var(--drift-x) * 0.45), -14px, 0) scale(1) rotate(calc(var(--item-rot) * 0.45));
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translate3d(var(--drift-x), calc(100vh - var(--start-y) + 160px), 0) scale(1) rotate(var(--item-rot));
+    opacity: 1;
+  }
+}
+
+.minecraft-dropped-item {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  animation: minecraftItemDrop var(--fall-duration, 1.4s) cubic-bezier(0.45, 0.05, 0.85, 0.65) forwards;
+  will-change: transform;
+}
+
+.minecraft-dropped-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 10px rgba(255, 200, 60, 0.45));
+}
+
 @media (prefers-reduced-motion: reduce) {
   .floating-balloon {
     bottom: 10vh;
