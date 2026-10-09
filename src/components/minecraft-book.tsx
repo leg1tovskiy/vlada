@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { VLADA_INTRO, VLADA_WISHES, type VladaWishItem } from "@/data/vlada-wishes";
 
 /**
@@ -35,276 +35,266 @@ class PageTurnAudio {
 
 const pageAudio = new PageTurnAudio();
 
-export interface ProcessedWishSpread {
-  id: number;
-  author: string;
+export interface BookPageData {
+  wishId?: number;
+  headerTitle: string;
   date?: string;
-  p1: string;
-  p2: string | null;
-  signatureOnPage: 1 | 2;
+  text: string;
+  authorSignature?: string;
+}
+
+export interface BookSpreadData {
+  spreadIndex: number;
+  isIntro?: boolean;
+  leftPage: BookPageData | null;
+  rightPage: BookPageData | null;
 }
 
 /**
- * Интеллектуальное разбиение текста поздравления на 2 страницы:
- * - Если поздравление небольшое и помещается на 1 страницу, то 2 страница пустует.
- * - Если поздравление не вместилось на 1 страницу, оно переходит на 2 страницу.
- * - Подпись автора ставится строго на той странице, где закончился текст поздравления.
+ * Интеллектуальное разбиение текста поздравления на страницы книги:
+ * - Текст не обрезается и не скроллится — он плавно переносится на следующие страницы.
+ * - Подпись автора ставится строго на последней странице, где заканчивается текст пожелания.
  */
-export function processWishSpread(wish: VladaWishItem, maxChars = 320): ProcessedWishSpread {
-  const text = wish.text.trim();
-  const rawParagraphs = text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
-
-  // Если текст короткий и не имеет избыточных строк — целиком на страницу 1
-  if (text.length <= maxChars && rawParagraphs.length <= 2 && text.split("\n").length <= 6) {
-    return {
-      id: wish.id,
-      author: wish.author,
-      date: wish.date,
-      p1: text,
-      p2: null,
-      signatureOnPage: 1,
-    };
+export function paginateWish(text: string, maxCharsPerPage = 380): string[] {
+  const trimmed = text.trim();
+  if (trimmed.length <= maxCharsPerPage) {
+    const lines = trimmed.split("\n");
+    if (lines.length <= 10) return [trimmed];
   }
 
-  // Разбиваем на семантические блоки (абзацы, строки, предложения)
-  const lines = text.split(/\n+/).map((l) => l.trim()).filter(Boolean);
-  const blocks: string[] = [];
-  for (const l of lines) {
-    if (l.length > 240) {
-      const sents = l.match(/[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g) || [l];
+  const paragraphs = trimmed.split(/\r?\n\s*\r?\n/).map((p) => p.trim()).filter(Boolean);
+  const pages: string[] = [];
+  let curPageText = "";
+
+  for (const para of paragraphs) {
+    const rawLines = para.split("\n").map((l) => l.trim()).filter(Boolean);
+    const isProse = rawLines.every((l) => l.length > 45) || rawLines.length <= 2;
+    const cleanPara = isProse ? rawLines.join(" ") : rawLines.join("\n");
+
+    let chunks: string[] = [];
+    if (cleanPara.length > 250) {
+      const sents = cleanPara.match(/[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g) || [cleanPara];
       for (const s of sents) {
-        if (s.trim()) blocks.push(s.trim());
+        const sTrim = s.trim();
+        if (sTrim.length > 250) {
+          const clauses = sTrim.match(/[^,;]+[,;]+(?:\s+|$)|[^,;]+$/g) || [sTrim];
+          let buf = "";
+          for (const c of clauses) {
+            const cTrim = c.trim();
+            if ((buf + " " + cTrim).trim().length > 220 && buf.length > 0) {
+              chunks.push(buf.trim());
+              buf = cTrim;
+            } else {
+              buf = (buf + " " + cTrim).trim();
+            }
+          }
+          if (buf.length > 0) chunks.push(buf.trim());
+        } else if (sTrim.length > 0) {
+          chunks.push(sTrim);
+        }
       }
     } else {
-      blocks.push(l);
+      chunks = [cleanPara];
+    }
+
+    for (let ci = 0; ci < chunks.length; ci++) {
+      const chunk = chunks[ci];
+      const sep = curPageText.length === 0 ? "" : ci === 0 ? "\n\n" : " ";
+      const testText = curPageText + sep + chunk;
+
+      if (curPageText.length > 0 && testText.length > maxCharsPerPage) {
+        pages.push(curPageText);
+        curPageText = chunk;
+      } else {
+        curPageText = testText;
+      }
     }
   }
 
-  const p1Arr: string[] = [];
-  const p2Arr: string[] = [];
-  let p1Len = 0;
-  const targetHalf = text.length / 2;
-  const maxP1 = text.length > maxChars * 1.5 ? targetHalf : maxChars + 40;
-
-  for (let i = 0; i < blocks.length; i++) {
-    const b = blocks[i];
-    if (
-      p1Arr.length === 0 ||
-      (p1Len + b.length <= maxP1 &&
-        (p1Len < targetHalf || i < Math.ceil(blocks.length / 2)))
-    ) {
-      p1Arr.push(b);
-      p1Len += b.length;
-    } else {
-      p2Arr.push(b);
-    }
+  if (curPageText.length > 0) {
+    pages.push(curPageText);
   }
 
-  if (p2Arr.length > 0) {
-    return {
-      id: wish.id,
-      author: wish.author,
-      date: wish.date,
-      p1: p1Arr.join("\n\n"),
-      p2: p2Arr.join("\n\n"),
-      signatureOnPage: 2,
-    };
-  }
-
-  return {
-    id: wish.id,
-    author: wish.author,
-    date: wish.date,
-    p1: text,
-    p2: null,
-    signatureOnPage: 1,
-  };
+  return pages.length > 0 ? pages : [trimmed];
 }
 
 /**
- * Внутренний контент левой страницы (Страница 1)
+ * Генерация всех разворотов книги (разворот 1 — Intro, развороты 2..N — поздравления).
+ * Каждое поздравление начинается на левой странице нового разворота и переходит на правые
+ * и последующие развороты до полного завершения с подписью.
  */
-function LeftPageContent({
-  spreadIndex,
-}: {
-  spreadIndex: number;
-}) {
-  const isIntro = spreadIndex === 1;
-  const wish = !isIntro ? processWishSpread(VLADA_WISHES[spreadIndex - 2]) : null;
+export function buildAllSpreads(wishesList: VladaWishItem[]): BookSpreadData[] {
+  const spreads: BookSpreadData[] = [];
 
-  if (isIntro) {
-    return (
-      <div className="flex h-full flex-col justify-between text-black font-minecraft leading-[1.4]">
-        <div>
-          <div className="text-center pb-2 border-b-2 border-black/15">
-            <h3
-              className="font-bold text-black"
-              style={{ fontSize: "clamp(15px, 2.4vw, 21px)" }}
-            >
-              {VLADA_INTRO.title}
-            </h3>
-            <p
-              className="text-black/70 mt-0.5"
-              style={{ fontSize: "clamp(10px, 1.6vw, 13px)" }}
-            >
-              {VLADA_INTRO.subtitle}
-            </p>
-          </div>
+  // Разворот 1: Вступительный лист
+  spreads.push({
+    spreadIndex: 1,
+    isIntro: true,
+    leftPage: null,
+    rightPage: null,
+  });
 
-          <div className="mt-3">
-            {VLADA_INTRO.paragraphs.length > 0 && (
-              <p
-                className="font-bold text-black pb-1.5 leading-snug"
-                style={{ fontSize: "clamp(13px, 2vw, 17px)" }}
-              >
-                {VLADA_INTRO.paragraphs[0]}
-              </p>
-            )}
+  for (const wish of wishesList) {
+    const pages = paginateWish(wish.text, 380);
+    const numSpreads = Math.ceil(pages.length / 2);
 
-            <div
-              className="space-y-2 text-black/95 font-normal"
-              style={{ fontSize: "clamp(11.5px, 1.7vw, 14.5px)", lineHeight: "1.4" }}
-            >
-              {VLADA_INTRO.paragraphs.slice(1).map((p, i) => (
-                <p key={i} className="leading-snug">
-                  {p}
-                </p>
-              ))}
-            </div>
-          </div>
-        </div>
+    for (let s = 0; s < numSpreads; s++) {
+      const pLeftIdx = s * 2;
+      const pRightIdx = s * 2 + 1;
 
-        {VLADA_INTRO.signature ? (
-          <div className="pt-2 text-right pr-2 text-black font-bold">
-            <p
-              className="italic opacity-90 inline-flex items-center justify-end gap-1.5"
-              style={{ fontSize: "clamp(11px, 1.6vw, 14px)" }}
-            >
-              {/[❤️❤💗]/.test(VLADA_INTRO.signature) ? (
-                <>
-                  <span>{VLADA_INTRO.signature.replace(/[❤️❤💗]/g, "").trim()}</span>
-                  <span className="not-italic inline-block font-sans text-[1.15em] leading-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]">
-                    {VLADA_INTRO.signature.includes("💗") ? "💗" : "❤️"}
-                  </span>
-                </>
-              ) : (
-                VLADA_INTRO.signature
-              )}
-            </p>
-          </div>
-        ) : null}
-      </div>
-    );
+      const isFirstSpreadOfWish = s === 0;
+      const isLeftLast = pLeftIdx === pages.length - 1;
+      const isRightLast = pRightIdx === pages.length - 1;
+
+      const leftPage: BookPageData = {
+        wishId: wish.id,
+        headerTitle: isFirstSpreadOfWish
+          ? `Поздравление #${wish.id}`
+          : `Поздравление #${wish.id} (продолжение)`,
+        date: wish.date,
+        text: pages[pLeftIdx],
+        authorSignature: isLeftLast ? wish.author : undefined,
+      };
+
+      let rightPage: BookPageData | null = null;
+      if (pRightIdx < pages.length) {
+        rightPage = {
+          wishId: wish.id,
+          headerTitle: "(продолжение)",
+          date: undefined,
+          text: pages[pRightIdx],
+          authorSignature: isRightLast ? wish.author : undefined,
+        };
+      }
+
+      spreads.push({
+        spreadIndex: spreads.length + 1,
+        isIntro: false,
+        leftPage,
+        rightPage,
+      });
+    }
   }
 
-  if (wish) {
-    const isVeryLong = wish.p1.length > 600 || (wish.p2 && wish.p2.length > 600);
-    const isLong = wish.p1.length > 320 || (wish.p2 && wish.p2.length > 320);
-    const fontSize = isVeryLong
-      ? "clamp(10px, 1.4vw, 12px)"
-      : isLong
-      ? "clamp(11px, 1.6vw, 13.5px)"
-      : "clamp(12px, 1.8vw, 15px)";
-    const lineHeight = isVeryLong ? "1.38" : "1.45";
+  return spreads;
+}
 
-    return (
-      <div className="flex h-full flex-col justify-between text-black font-minecraft leading-[1.45]">
-        <div className="flex-1 min-h-0 overflow-y-auto pr-1 select-text scrollbar-thin">
+/**
+ * Внутренний контент вступительной страницы
+ */
+function IntroPageContent() {
+  return (
+    <div className="flex h-full flex-col justify-between text-black font-minecraft leading-[1.4]">
+      <div>
+        <div className="text-center pb-2 border-b-2 border-black/15">
+          <h3
+            className="font-bold text-black"
+            style={{ fontSize: "clamp(15px, 2.4vw, 21px)" }}
+          >
+            {VLADA_INTRO.title}
+          </h3>
+          <p
+            className="text-black/70 mt-0.5"
+            style={{ fontSize: "clamp(10px, 1.6vw, 13px)" }}
+          >
+            {VLADA_INTRO.subtitle}
+          </p>
+        </div>
+
+        <div className="mt-3">
+          {VLADA_INTRO.paragraphs.length > 0 && (
+            <p
+              className="font-bold text-black pb-1.5 leading-snug"
+              style={{ fontSize: "clamp(13px, 2vw, 17px)" }}
+            >
+              {VLADA_INTRO.paragraphs[0]}
+            </p>
+          )}
+
+          <div
+            className="space-y-2 text-black/95 font-normal"
+            style={{ fontSize: "clamp(11.5px, 1.7vw, 14.5px)", lineHeight: "1.4" }}
+          >
+            {VLADA_INTRO.paragraphs.slice(1).map((p, i) => (
+              <p key={i} className="leading-snug">
+                {p}
+              </p>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {VLADA_INTRO.signature ? (
+        <div className="pt-2 text-right pr-2 text-black font-bold">
+          <p
+            className="italic opacity-90 inline-flex items-center justify-end gap-1.5"
+            style={{ fontSize: "clamp(11px, 1.6vw, 14px)" }}
+          >
+            {/[❤️❤💗]/.test(VLADA_INTRO.signature) ? (
+              <>
+                <span>{VLADA_INTRO.signature.replace(/[❤️❤💗]/g, "").trim()}</span>
+                <span className="not-italic inline-block font-sans text-[1.15em] leading-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]">
+                  {VLADA_INTRO.signature.includes("💗") ? "💗" : "❤️"}
+                </span>
+              </>
+            ) : (
+              VLADA_INTRO.signature
+            )}
+          </p>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * Внутренний контент страницы поздравления (без внутренних полос прокрутки!)
+ */
+function PageContent({ page }: { page: BookPageData | null }) {
+  if (!page) {
+    return <div className="size-full" />;
+  }
+
+  return (
+    <div className="flex h-full flex-col justify-between text-black font-minecraft leading-[1.42]">
+      <div className="flex-1 min-h-0 overflow-hidden select-text">
+        {page.headerTitle ? (
           <div className="flex items-center justify-between pb-1.5 border-b border-black/10">
             <span
               className="font-bold text-black/80 flex items-center gap-1"
               style={{ fontSize: "clamp(11px, 1.7vw, 14px)" }}
             >
-              <span>Поздравление #{wish.id}</span>
+              <span>{page.headerTitle}</span>
             </span>
-            {wish.date ? (
+            {page.date ? (
               <span
                 className="text-black/50"
                 style={{ fontSize: "clamp(9px, 1.4vw, 11px)" }}
               >
-                {wish.date}
+                {page.date}
               </span>
             ) : null}
           </div>
-
-          <div
-            className="mt-2 text-black font-normal whitespace-pre-wrap leading-relaxed"
-            style={{ fontSize, lineHeight }}
-          >
-            {wish.p1}
-          </div>
-        </div>
-
-        {wish.signatureOnPage === 1 ? (
-          <div className="pt-1.5 text-right pr-2 shrink-0">
-            <p
-              className="font-bold text-black"
-              style={{ fontSize: "clamp(11.5px, 1.7vw, 14.5px)" }}
-            >
-              — {wish.author}
-            </p>
-          </div>
         ) : null}
-      </div>
-    );
-  }
-
-  return null;
-}
-
-/**
- * Внутренний контент правой страницы (Страница 2)
- */
-function RightPageContent({
-  spreadIndex,
-}: {
-  spreadIndex: number;
-}) {
-  const isIntro = spreadIndex === 1;
-  const wish = !isIntro ? processWishSpread(VLADA_WISHES[spreadIndex - 2]) : null;
-
-  if (isIntro || !wish || !wish.p2) {
-    // 2 страница пустует
-    return <div className="size-full" />;
-  }
-
-  const isVeryLong = (wish.p2 && wish.p2.length > 600) || wish.p1.length > 600;
-  const isLong = (wish.p2 && wish.p2.length > 320) || wish.p1.length > 320;
-  const fontSize = isVeryLong
-    ? "clamp(10px, 1.4vw, 12px)"
-    : isLong
-    ? "clamp(11px, 1.6vw, 13.5px)"
-    : "clamp(12px, 1.8vw, 15px)";
-  const lineHeight = isVeryLong ? "1.38" : "1.45";
-
-  return (
-    <div className="flex h-full flex-col justify-between text-black font-minecraft leading-[1.45]">
-      <div className="flex-1 min-h-0 overflow-y-auto pr-1 select-text scrollbar-thin">
-        <div className="flex items-center justify-between pb-1.5 border-b border-black/10">
-          <span
-            className="italic opacity-60 font-bold"
-            style={{ fontSize: "clamp(10px, 1.6vw, 13px)" }}
-          >
-            (продолжение)
-          </span>
-        </div>
 
         <div
           className="mt-2 text-black font-normal whitespace-pre-wrap leading-relaxed"
-          style={{ fontSize, lineHeight }}
+          style={{ fontSize: "clamp(11px, 1.55vw, 13px)", lineHeight: "1.42" }}
         >
-          {wish.p2}
+          {page.text}
         </div>
       </div>
 
-      <div className="pt-1.5 text-right pr-2 shrink-0">
-        <p
-          className="font-bold text-black"
-          style={{ fontSize: "clamp(11.5px, 1.7vw, 14.5px)" }}
-        >
-          — {wish.author}
-        </p>
-      </div>
+      {page.authorSignature ? (
+        <div className="pt-1.5 text-right pr-2 shrink-0">
+          <p
+            className="font-bold text-black"
+            style={{ fontSize: "clamp(11.5px, 1.7vw, 14.5px)" }}
+          >
+            — {page.authorSignature}
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -313,11 +303,11 @@ function RightPageContent({
  * Полный вид левой половины разворота книги (текстура, паутинка, номер страницы, текст)
  */
 function LeftPageView({
-  spreadIndex,
+  spread,
   totalSpreads,
   isOpening,
 }: {
-  spreadIndex: number;
+  spread: BookSpreadData;
   totalSpreads: number;
   isOpening?: boolean;
 }) {
@@ -357,7 +347,7 @@ function LeftPageView({
           lineHeight: 1,
         }}
       >
-        Page {spreadIndex} of {totalSpreads}
+        Page {spread.spreadIndex} of {totalSpreads}
       </div>
 
       {/* Содержимое левой страницы */}
@@ -372,7 +362,7 @@ function LeftPageView({
           bottom: "14%",
         }}
       >
-        <LeftPageContent spreadIndex={spreadIndex} />
+        {spread.isIntro ? <IntroPageContent /> : <PageContent page={spread.leftPage} />}
       </div>
     </div>
   );
@@ -382,15 +372,12 @@ function LeftPageView({
  * Полный вид правой половины разворота книги (текстура, паутинка, заголовок, текст)
  */
 function RightPageView({
-  spreadIndex,
+  spread,
   isOpening,
 }: {
-  spreadIndex: number;
+  spread: BookSpreadData;
   isOpening?: boolean;
 }) {
-  const isIntro = spreadIndex === 1;
-  const wish = !isIntro ? processWishSpread(VLADA_WISHES[spreadIndex - 2]) : null;
-
   return (
     <div className="absolute inset-0 size-full overflow-hidden select-none">
       {/* Текстура правой половины книги: стандартное положение, красный шов у корешка слева */}
@@ -415,8 +402,8 @@ function RightPageView({
         }}
       />
 
-      {/* Заголовок правой страницы: отображается ТОЛЬКО если на 2 странице есть продолжение */}
-      {wish && wish.p2 ? (
+      {/* Заголовок правой страницы: отображается ТОЛЬКО если на 2 странице есть контент */}
+      {spread.rightPage ? (
         <div
           className={`absolute z-20 pointer-events-none text-black font-minecraft text-right font-normal ${
             isOpening ? "book-content-reveal" : ""
@@ -428,7 +415,7 @@ function RightPageView({
             lineHeight: 1,
           }}
         >
-          Page {spreadIndex}
+          Page {spread.spreadIndex}
         </div>
       ) : null}
 
@@ -444,7 +431,7 @@ function RightPageView({
           bottom: "14%",
         }}
       >
-        <RightPageContent spreadIndex={spreadIndex} />
+        <PageContent page={spread.rightPage} />
       </div>
     </div>
   );
@@ -458,10 +445,15 @@ type FlipState = {
 };
 
 export function MinecraftBook() {
-  // Разворот 1 = Вступительный лист, развороты 2..N = поздравления
-  const totalSpreads = VLADA_WISHES.length + 1;
+  const allSpreads = useMemo(() => buildAllSpreads(VLADA_WISHES), []);
+  const totalSpreads = allSpreads.length;
   const [currentSpread, setCurrentSpread] = useState(1);
   const spreadRef = useRef(1);
+
+  const getSpread = useCallback(
+    (idx: number) => allSpreads[Math.max(0, Math.min(allSpreads.length - 1, idx - 1))],
+    [allSpreads]
+  );
 
   // Анимация раскрытия книги при первом заходе (~1.7 сек, плавно без рывков)
   const [isOpening, setIsOpening] = useState(true);
@@ -554,9 +546,6 @@ export function MinecraftBook() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [flipTo, nextSpread, prevSpread, totalSpreads]);
 
-  const currentWish =
-    currentSpread > 1 ? processWishSpread(VLADA_WISHES[currentSpread - 2]) : null;
-
   // Во время анимации перелистывания базовые развороты показывают неподвижные страницы
   const baseLeftSpread = flipState
     ? (flipState.direction === "forward" ? flipState.fromSpread : flipState.targetSpread)
@@ -622,7 +611,7 @@ export function MinecraftBook() {
             style={{ zIndex: 10 }}
           >
             <LeftPageView
-              spreadIndex={baseLeftSpread}
+              spread={getSpread(baseLeftSpread)}
               totalSpreads={totalSpreads}
               isOpening={isOpening}
             />
@@ -670,7 +659,7 @@ export function MinecraftBook() {
             style={{ zIndex: 10 }}
           >
             <RightPageView
-              spreadIndex={baseRightSpread}
+              spread={getSpread(baseRightSpread)}
               isOpening={isOpening}
             />
 
@@ -715,14 +704,14 @@ export function MinecraftBook() {
             >
               {/* Лицевая сторона: уходящая правая страница (видна при 0°..-90°) */}
               <div className="absolute inset-0 size-full overflow-hidden flip-face-front">
-                <RightPageView spreadIndex={flipState.fromSpread} />
+                <RightPageView spread={getSpread(flipState.fromSpread)} />
                 <div className="absolute inset-0 size-full pointer-events-none flip-shadow-front" />
               </div>
 
               {/* Оборотная сторона: приходящая левая страница (видна при -90°..-180°) */}
               <div className="absolute inset-0 size-full overflow-hidden flip-face-back">
                 <LeftPageView
-                  spreadIndex={flipState.targetSpread}
+                  spread={getSpread(flipState.targetSpread)}
                   totalSpreads={totalSpreads}
                 />
                 <div className="absolute inset-0 size-full pointer-events-none flip-shadow-back" />
@@ -745,7 +734,7 @@ export function MinecraftBook() {
               {/* Лицевая сторона: уходящая левая страница (видна при 0°..90°) */}
               <div className="absolute inset-0 size-full overflow-hidden flip-face-front">
                 <LeftPageView
-                  spreadIndex={flipState.fromSpread}
+                  spread={getSpread(flipState.fromSpread)}
                   totalSpreads={totalSpreads}
                 />
                 <div className="absolute inset-0 size-full pointer-events-none flip-shadow-front" />
@@ -753,7 +742,7 @@ export function MinecraftBook() {
 
               {/* Оборотная сторона: приходящая правая страница (видна при 90°..180°) */}
               <div className="absolute inset-0 size-full overflow-hidden flip-face-back">
-                <RightPageView spreadIndex={flipState.targetSpread} />
+                <RightPageView spread={getSpread(flipState.targetSpread)} />
                 <div className="absolute inset-0 size-full pointer-events-none flip-shadow-back" />
               </div>
             </div>
