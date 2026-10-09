@@ -8,7 +8,7 @@ let audioCtx: AudioContext | null = null;
 let cachedBuffer: AudioBuffer | null = null;
 let isLoading = false;
 
-const SOUND_URL = "/sounds/balloon_pop.wav";
+const SOUND_URL = "/sounds/pop.mp3";
 
 function getAudioContext(): AudioContext | null {
   if (typeof window === "undefined") return null;
@@ -60,11 +60,12 @@ export function playBalloonPopSound() {
         const source = ctx.createBufferSource();
         source.buffer = cachedBuffer;
 
-        // Небольшая случайная вариация тона для естественности (как в игре)
-        source.playbackRate.value = 0.94 + Math.random() * 0.12;
+        // Небольшая случайная вариация тона для естественности
+        source.playbackRate.value = 0.95 + Math.random() * 0.1;
 
+        // Громкость уменьшена в 2.5 раза (1.0 / 2.5 = 0.4)
         const gainNode = ctx.createGain();
-        gainNode.gain.value = 0.8;
+        gainNode.gain.value = 0.4;
 
         source.connect(gainNode);
         gainNode.connect(ctx.destination);
@@ -74,10 +75,10 @@ export function playBalloonPopSound() {
       }
     }
 
-    // Резервный вариант через HTML5 Audio
+    // Резервный вариант через HTML5 Audio (в 2.5 раза тише)
     const fallback = new Audio(SOUND_URL);
-    fallback.volume = 0.8;
-    fallback.playbackRate = 0.94 + Math.random() * 0.12;
+    fallback.volume = 0.4;
+    fallback.playbackRate = 0.95 + Math.random() * 0.1;
     void fallback.play().catch(() => {});
 
     // Загружаем буфер для последующих кликов, если ещё не успел
