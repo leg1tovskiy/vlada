@@ -1,48 +1,89 @@
-let audioContext: AudioContext | null = null;
+/**
+ * Воспроизведение аутентичного звука лопания шарика.
+ * Использует звуковой сэмпл (оригинальный Minecraft pop) с предварительной загрузкой в Web Audio API,
+ * нулевой задержкой, полифонией и естественной микро-вариацией тона.
+ */
 
-export function playBalloonPopSound() {
-  try {
+let audioCtx: AudioContext | null = null;
+let cachedBuffer: AudioBuffer | null = null;
+let isLoading = false;
+
+const SOUND_URL = "/sounds/pop.ogg";
+
+function getAudioContext(): AudioContext | null {
+  if (typeof window === "undefined") return null;
+  if (!audioCtx) {
     const AudioContextClass =
       window.AudioContext ||
       (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-
-    if (!AudioContextClass) {
-      const fallback = new Audio("/sounds/pop.wav");
-      void fallback.play().catch(() => {});
-      return;
+    if (AudioContextClass) {
+      audioCtx = new AudioContextClass();
     }
+  }
+  return audioCtx;
+}
 
-    if (!audioContext) {
-      audioContext = new AudioContextClass();
-    }
-    if (audioContext.state === "suspended") {
-      void audioContext.resume();
-    }
+async function preloadSound(): Promise<AudioBuffer | null> {
+  if (cachedBuffer) return cachedBuffer;
+  if (isLoading) return null;
+  const ctx = getAudioContext();
+  if (!ctx) return null;
 
-    const ctx = audioContext;
-    const now = ctx.currentTime;
-    const pitch = 0.93 + Math.random() * 0.14;
-
-    // Мягкий не выделяющийся "пуп" (чистый синусоидальный спад с 420Гц до 130Гц за 45мс)
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(420 * pitch, now);
-    osc.frequency.exponentialRampToValueAtTime(130 * pitch, now + 0.045);
-
-    // Мягкая ненавязчивая громкость, гладкая микроатака и экспоненциальный спад
-    gain.gain.setValueAtTime(0.001, now);
-    gain.gain.linearRampToValueAtTime(0.24, now + 0.002);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.048);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start(now);
-    osc.stop(now + 0.05);
+  try {
+    isLoading = true;
+    const response = await fetch(SOUND_URL);
+    const arrayBuf = await response.arrayBuffer();
+    cachedBuffer = await ctx.decodeAudioData(arrayBuf);
+    return cachedBuffer;
   } catch {
-    const fallback = new Audio("/sounds/pop.wav");
+    return null;
+  } finally {
+    isLoading = false;
+  }
+}
+
+// Предзагрузка при старте
+if (typeof window !== "undefined") {
+  void preloadSound();
+}
+
+export function playBalloonPopSound() {
+  try {
+    const ctx = getAudioContext();
+
+    if (ctx) {
+      if (ctx.state === "suspended") {
+        void ctx.resume();
+      }
+
+      if (cachedBuffer) {
+        const source = ctx.createBufferSource();
+        source.buffer = cachedBuffer;
+
+        // Небольшая случайная вариация тона для естественности (как в игре)
+        source.playbackRate.value = 0.94 + Math.random() * 0.12;
+
+        const gainNode = ctx.createGain();
+        gainNode.gain.value = 0.8;
+
+        source.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        source.start(0);
+        return;
+      }
+    }
+
+    // Резервный вариант через HTML5 Audio
+    const fallback = new Audio(SOUND_URL);
+    fallback.volume = 0.8;
+    fallback.playbackRate = 0.94 + Math.random() * 0.12;
+    void fallback.play().catch(() => {});
+
+    // Загружаем буфер для последующих кликов, если ещё не успел
+    void preloadSound();
+  } catch {
+    const fallback = new Audio(SOUND_URL);
     void fallback.play().catch(() => {});
   }
 }
