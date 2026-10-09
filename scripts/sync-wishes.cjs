@@ -15,19 +15,12 @@ while ((match = regex.exec(content)) !== null) {
   let author = '';
   let text = raw;
 
-  if (num === 17) {
-    const m = raw.match(/-\s*rever1e/i);
-    if (m) {
-      author = 'rever1e';
-      text = raw.slice(0, m.index).trim();
-    }
-  } else {
-    const lines = raw.split(/\r?\n/);
-    const lastLine = lines[lines.length - 1].trim();
-    if (lastLine.startsWith('-') || lastLine.startsWith('—') || lastLine.startsWith('–')) {
-      author = lastLine.replace(/^[-—–]\s*/, '').trim();
-      text = lines.slice(0, -1).join('\n').trim();
-    }
+  const lines = raw.split(/\r?\n/);
+  // Находим последнюю строку-подпись автора (-автор, —автор, –автор)
+  const sigIndex = lines.findLastIndex(l => /^[-—–]\s*[^\s]/.test(l.trim()));
+  if (sigIndex !== -1) {
+    author = lines[sigIndex].trim().replace(/^[-—–]\s*/, '').trim();
+    text = lines.slice(0, sigIndex).join('\n').trim();
   }
 
   text = text.replace(/\r\n/g, '\n');
