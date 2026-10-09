@@ -84,12 +84,13 @@ export function processWishSpread(wish: VladaWishItem, maxChars = 320): Processe
   const p2Arr: string[] = [];
   let p1Len = 0;
   const targetHalf = text.length / 2;
+  const maxP1 = text.length > maxChars * 1.5 ? targetHalf : maxChars + 40;
 
   for (let i = 0; i < blocks.length; i++) {
     const b = blocks[i];
     if (
       p1Arr.length === 0 ||
-      (p1Len + b.length <= maxChars + 40 &&
+      (p1Len + b.length <= maxP1 &&
         (p1Len < targetHalf || i < Math.ceil(blocks.length / 2)))
     ) {
       p1Arr.push(b);
@@ -197,9 +198,18 @@ function LeftPageContent({
   }
 
   if (wish) {
+    const isVeryLong = wish.p1.length > 600 || (wish.p2 && wish.p2.length > 600);
+    const isLong = wish.p1.length > 320 || (wish.p2 && wish.p2.length > 320);
+    const fontSize = isVeryLong
+      ? "clamp(10px, 1.4vw, 12px)"
+      : isLong
+      ? "clamp(11px, 1.6vw, 13.5px)"
+      : "clamp(12px, 1.8vw, 15px)";
+    const lineHeight = isVeryLong ? "1.38" : "1.45";
+
     return (
       <div className="flex h-full flex-col justify-between text-black font-minecraft leading-[1.45]">
-        <div className="overflow-hidden pr-1">
+        <div className="flex-1 min-h-0 overflow-y-auto pr-1 select-text scrollbar-thin">
           <div className="flex items-center justify-between pb-1.5 border-b border-black/10">
             <span
               className="font-bold text-black/80 flex items-center gap-1"
@@ -218,18 +228,18 @@ function LeftPageContent({
           </div>
 
           <div
-            className="mt-2.5 text-black font-normal whitespace-pre-wrap leading-relaxed"
-            style={{ fontSize: "clamp(12px, 1.8vw, 15px)", lineHeight: "1.45" }}
+            className="mt-2 text-black font-normal whitespace-pre-wrap leading-relaxed"
+            style={{ fontSize, lineHeight }}
           >
             {wish.p1}
           </div>
         </div>
 
         {wish.signatureOnPage === 1 ? (
-          <div className="pt-2 text-right pr-2">
+          <div className="pt-1.5 text-right pr-2 shrink-0">
             <p
               className="font-bold text-black"
-              style={{ fontSize: "clamp(12px, 1.8vw, 15px)" }}
+              style={{ fontSize: "clamp(11.5px, 1.7vw, 14.5px)" }}
             >
               — {wish.author}
             </p>
@@ -258,9 +268,18 @@ function RightPageContent({
     return <div className="size-full" />;
   }
 
+  const isVeryLong = (wish.p2 && wish.p2.length > 600) || wish.p1.length > 600;
+  const isLong = (wish.p2 && wish.p2.length > 320) || wish.p1.length > 320;
+  const fontSize = isVeryLong
+    ? "clamp(10px, 1.4vw, 12px)"
+    : isLong
+    ? "clamp(11px, 1.6vw, 13.5px)"
+    : "clamp(12px, 1.8vw, 15px)";
+  const lineHeight = isVeryLong ? "1.38" : "1.45";
+
   return (
     <div className="flex h-full flex-col justify-between text-black font-minecraft leading-[1.45]">
-      <div className="overflow-hidden pr-1">
+      <div className="flex-1 min-h-0 overflow-y-auto pr-1 select-text scrollbar-thin">
         <div className="flex items-center justify-between pb-1.5 border-b border-black/10">
           <span
             className="italic opacity-60 font-bold"
@@ -271,17 +290,17 @@ function RightPageContent({
         </div>
 
         <div
-          className="mt-2.5 text-black font-normal whitespace-pre-wrap leading-relaxed"
-          style={{ fontSize: "clamp(12px, 1.8vw, 15px)", lineHeight: "1.45" }}
+          className="mt-2 text-black font-normal whitespace-pre-wrap leading-relaxed"
+          style={{ fontSize, lineHeight }}
         >
           {wish.p2}
         </div>
       </div>
 
-      <div className="pt-2 text-right pr-2">
+      <div className="pt-1.5 text-right pr-2 shrink-0">
         <p
           className="font-bold text-black"
-          style={{ fontSize: "clamp(12px, 1.8vw, 15px)" }}
+          style={{ fontSize: "clamp(11.5px, 1.7vw, 14.5px)" }}
         >
           — {wish.author}
         </p>
