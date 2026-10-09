@@ -8,7 +8,7 @@ let audioCtx: AudioContext | null = null;
 let cachedBuffer: AudioBuffer | null = null;
 let isLoading = false;
 
-const SOUND_URL = "/sounds/pop.ogg";
+const SOUND_URL = "/sounds/balloon_pop.wav";
 
 function getAudioContext(): AudioContext | null {
   if (typeof window === "undefined") return null;
