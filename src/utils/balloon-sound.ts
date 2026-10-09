@@ -63,9 +63,9 @@ export function playBalloonPopSound() {
         // Небольшая случайная вариация тона для естественности
         source.playbackRate.value = 0.95 + Math.random() * 0.1;
 
-        // Громкость уменьшена в 2.5 раза (1.0 / 2.5 = 0.4)
+        // Громкость уменьшена ещё в 1.5 раза (0.4 / 1.5 ≈ 0.26)
         const gainNode = ctx.createGain();
-        gainNode.gain.value = 0.4;
+        gainNode.gain.value = 0.26;
 
         source.connect(gainNode);
         gainNode.connect(ctx.destination);
@@ -75,9 +75,9 @@ export function playBalloonPopSound() {
       }
     }
 
-    // Резервный вариант через HTML5 Audio (в 2.5 раза тише)
+    // Резервный вариант через HTML5 Audio (в 1.5 раза тише)
     const fallback = new Audio(SOUND_URL);
-    fallback.volume = 0.4;
+    fallback.volume = 0.26;
     fallback.playbackRate = 0.95 + Math.random() * 0.1;
     void fallback.play().catch(() => {});
 
