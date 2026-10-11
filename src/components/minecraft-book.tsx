@@ -307,10 +307,12 @@ function LeftPageView({
   spread,
   totalSpreads,
   isOpening,
+  onSignClick,
 }: {
   spread: BookSpreadData;
   totalSpreads: number;
   isOpening?: boolean;
+  onSignClick?: () => void;
 }) {
   return (
     <div className="absolute inset-0 size-full overflow-hidden select-none">
@@ -363,7 +365,24 @@ function LeftPageView({
           bottom: "14%",
         }}
       >
-        {spread.isIntro ? <IntroPageContent /> : <PageContent page={spread.leftPage} />}
+        {spread.isIntro ? (
+          <IntroPageContent />
+        ) : (
+          <div className="flex h-full flex-col justify-between">
+            <PageContent page={spread.leftPage} />
+            {onSignClick && !spread.rightPage ? (
+              <div className="pt-2 flex justify-end pr-1 pointer-events-auto">
+                <button
+                  type="button"
+                  onClick={onSignClick}
+                  className="mc-button cursor-pointer px-2.5 py-1 text-[10px] sm:text-xs font-minecraft font-bold !text-amber-300 shadow-md active:scale-95"
+                >
+                  Подписать книгу ✍️
+                </button>
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -375,9 +394,11 @@ function LeftPageView({
 function RightPageView({
   spread,
   isOpening,
+  onSignClick,
 }: {
   spread: BookSpreadData;
   isOpening?: boolean;
+  onSignClick?: () => void;
 }) {
   return (
     <div className="absolute inset-0 size-full overflow-hidden select-none">
@@ -432,7 +453,34 @@ function RightPageView({
           bottom: "14%",
         }}
       >
-        <PageContent page={spread.rightPage} />
+        {spread.rightPage ? (
+          <PageContent page={spread.rightPage} />
+        ) : onSignClick ? (
+          <div className="flex h-full flex-col items-center justify-center text-center p-2 select-none">
+            <div className="text-3xl sm:text-4xl select-none mb-1.5 animate-bounce">✍️</div>
+            <h4
+              className="font-bold text-black font-minecraft mb-1"
+              style={{ fontSize: "clamp(12px, 2vw, 16px)" }}
+            >
+              Конец книги
+            </h4>
+            <p
+              className="text-black/70 font-minecraft text-[10px] sm:text-xs mb-3.5 leading-snug max-w-[190px]"
+              style={{ fontSize: "clamp(9px, 1.4vw, 11px)" }}
+            >
+              Все поздравления прочитаны! Теперь оставь свою подпись:
+            </p>
+            <button
+              type="button"
+              onClick={onSignClick}
+              className="mc-button pointer-events-auto cursor-pointer px-3.5 py-1.5 text-xs sm:text-sm font-minecraft font-bold !text-amber-300 shadow-lg active:scale-95 transition-transform"
+            >
+              Подписать книгу
+            </button>
+          </div>
+        ) : (
+          <PageContent page={null} />
+        )}
       </div>
     </div>
   );
@@ -803,6 +851,7 @@ export function MinecraftBook() {
               spread={getSpread(baseLeftSpread)}
               totalSpreads={totalSpreads}
               isOpening={isOpening}
+              onSignClick={currentSpread === totalSpreads ? handleCloseBookForSigning : undefined}
             />
 
             {/* Кнопка перехода к предыдущему развороту (на левой странице) */}
@@ -850,6 +899,7 @@ export function MinecraftBook() {
             <RightPageView
               spread={getSpread(baseRightSpread)}
               isOpening={isOpening}
+              onSignClick={currentSpread === totalSpreads ? handleCloseBookForSigning : undefined}
             />
 
             {/* Кнопка перехода к следующему развороту (на правой странице) */}
@@ -918,6 +968,7 @@ export function MinecraftBook() {
                 <LeftPageView
                   spread={getSpread(flipState.targetSpread)}
                   totalSpreads={totalSpreads}
+                  onSignClick={flipState.targetSpread === totalSpreads ? handleCloseBookForSigning : undefined}
                 />
                 <div className="absolute inset-0 size-full pointer-events-none flip-shadow-back" />
               </div>
@@ -941,13 +992,17 @@ export function MinecraftBook() {
                 <LeftPageView
                   spread={getSpread(flipState.fromSpread)}
                   totalSpreads={totalSpreads}
+                  onSignClick={flipState.fromSpread === totalSpreads ? handleCloseBookForSigning : undefined}
                 />
                 <div className="absolute inset-0 size-full pointer-events-none flip-shadow-front" />
               </div>
 
               {/* Оборотная сторона: приходящая правая страница (видна при 90°..180°) */}
               <div className="absolute inset-0 size-full overflow-hidden flip-face-back">
-                <RightPageView spread={getSpread(flipState.targetSpread)} />
+                <RightPageView
+                  spread={getSpread(flipState.targetSpread)}
+                  onSignClick={flipState.targetSpread === totalSpreads ? handleCloseBookForSigning : undefined}
+                />
                 <div className="absolute inset-0 size-full pointer-events-none flip-shadow-back" />
               </div>
             </div>
