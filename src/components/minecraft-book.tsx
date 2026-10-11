@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import confetti from "canvas-confetti";
 import { VLADA_INTRO, VLADA_WISHES, type VladaWishItem } from "@/data/vlada-wishes";
 
 /**
@@ -437,6 +438,180 @@ function RightPageView({
   );
 }
 
+/**
+ * Закрытая обложка книги (после нажатия «Подписать книгу»)
+ */
+function ClosedBookCover() {
+  const [nickname, setNickname] = useState("minilyyy");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSigned, setIsSigned] = useState(false);
+
+  const handleSign = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (isSubmitting || isSigned) return;
+
+    const finalNick = nickname.trim() || "minilyyy";
+    setIsSubmitting(true);
+
+    try {
+      // 1. Запрос через Caddy reverse proxy на /api/vlada-sign
+      let sent = false;
+      try {
+        const res = await fetch("/api/vlada-sign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nickname: finalNick }),
+        });
+        if (res.ok) sent = true;
+      } catch (err) {
+        console.warn("Proxy sign error:", err);
+      }
+
+      // 2. Fallback через прямой порт бота 3847
+      if (!sent) {
+        try {
+          await fetch("http://64.188.66.194:3847/panel/vlada-sign", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nickname: finalNick }),
+          });
+        } catch (err) {
+          console.warn("Direct bot sign error:", err);
+        }
+      }
+    } finally {
+      setIsSubmitting(false);
+      setIsSigned(true);
+
+      // Запуск праздничных конфетти
+      try {
+        void confetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.55 },
+          colors: ["#ff8a3d", "#a855f7", "#3dd68c", "#6ea8ff", "#ffd166", "#f43f5e"],
+        });
+        setTimeout(() => {
+          void confetti({
+            particleCount: 80,
+            spread: 90,
+            origin: { y: 0.65 },
+            colors: ["#ffd166", "#ff8a3d", "#ec4899"],
+          });
+        }, 300);
+      } catch {}
+    }
+  };
+
+  return (
+    <div
+      className="relative w-[min(90vw,440px)] aspect-[3/4] max-h-[min(560px,72vh)] rounded-2xl select-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)] overflow-hidden border-4 border-[#2b180d] bg-gradient-to-b from-[#4a2814] via-[#381a0b] to-[#221006] p-6 sm:p-8 flex flex-col justify-between items-center text-center animate-in fade-in zoom-in-95 duration-500"
+      style={{
+        boxShadow: "inset 0 0 50px rgba(0,0,0,0.7), 0 20px 50px rgba(0,0,0,0.9)",
+      }}
+    >
+      {/* Праздничные декорации на обложке закрытой книги */}
+      <div className="absolute -top-6 -left-3 pointer-events-auto select-none group z-30">
+        <div className="relative candle-glow transition-transform duration-300 ease-out group-hover:scale-105 cursor-pointer filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]">
+          <img
+            src="/cake-3tier.svg"
+            alt="Cake"
+            className="w-12 sm:w-14 h-auto pixelated pointer-events-none"
+            style={{ imageRendering: "pixelated" }}
+          />
+        </div>
+      </div>
+      <div className="absolute -top-5 -right-3 pointer-events-auto select-none group z-30">
+        <div className="relative halloween-pumpkin-glow transition-transform duration-300 ease-out group-hover:scale-105 cursor-pointer">
+          <img
+            src="/pixel-pumpkin.png"
+            alt="Pumpkin"
+            className="w-12 sm:w-14 h-auto pixelated pointer-events-none"
+            style={{ imageRendering: "pixelated" }}
+          />
+        </div>
+      </div>
+
+      {/* Декоративная внутренняя прострочка обложки */}
+      <div className="pointer-events-none absolute inset-2.5 rounded-xl border border-dashed border-amber-600/30" />
+
+      {/* Золотые уголки книги */}
+      <div className="pointer-events-none absolute top-3 left-3 size-4 border-t-2 border-l-2 border-amber-400/70" />
+      <div className="pointer-events-none absolute top-3 right-3 size-4 border-t-2 border-r-2 border-amber-400/70" />
+      <div className="pointer-events-none absolute bottom-3 left-3 size-4 border-b-2 border-l-2 border-amber-400/70" />
+      <div className="pointer-events-none absolute bottom-3 right-3 size-4 border-b-2 border-r-2 border-amber-400/70" />
+
+      {/* Заголовок обложки */}
+      <div className="relative z-10 pt-2 space-y-1">
+        <div className="inline-block text-2xl select-none">✨</div>
+        <h2 className="text-xl sm:text-2xl font-bold font-minecraft text-amber-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+          Для Влады
+        </h2>
+        <p className="text-xs sm:text-sm font-minecraft text-amber-200/75">
+          Праздничная книга
+        </p>
+      </div>
+
+      {/* Центральный элемент: зачарованная книга с мягким пульсирующим сиянием */}
+      <div className="relative z-10 my-auto py-3">
+        <div className="relative group">
+          <div className="absolute inset-0 rounded-full bg-amber-500/20 blur-xl animate-pulse" />
+          <img
+            src="/mc-items/enchanted_book.png"
+            alt="Зачарованная книга"
+            className="relative size-20 sm:size-24 mx-auto object-contain pixelated filter drop-shadow-[0_0_16px_rgba(245,158,11,0.6)]"
+            style={{ imageRendering: "pixelated" }}
+          />
+        </div>
+      </div>
+
+      {/* Нижняя часть: поле для ввода подписи ИЛИ подтверждение */}
+      <div className="relative z-10 w-full pb-2">
+        {!isSigned ? (
+          <form onSubmit={handleSign} className="space-y-3">
+            <label className="block text-xs font-minecraft text-amber-200/90 font-bold">
+              Подпись книги:
+            </label>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 max-w-[290px] mx-auto">
+              <input
+                type="text"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                placeholder="minilyyy"
+                autoFocus
+                className="w-full rounded-lg border-2 border-amber-700/60 bg-[#160d08] px-3 py-1.5 text-center text-xs sm:text-sm font-minecraft font-bold text-amber-200 placeholder-amber-400/40 focus:border-amber-400 focus:outline-none shadow-inner"
+              />
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="mc-button h-8 px-4 text-xs font-minecraft font-bold !text-amber-300 whitespace-nowrap active:scale-95 cursor-pointer disabled:opacity-50"
+              >
+                {isSubmitting ? "Подпись..." : "Подписать"}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-2 p-3 sm:p-4 rounded-xl border border-emerald-500/40 bg-emerald-950/60 backdrop-blur-sm shadow-[0_0_24px_rgba(16,185,129,0.25)] animate-in fade-in zoom-in-95">
+            <p className="text-xs sm:text-sm font-minecraft font-bold text-emerald-300">
+              ✨ Благодарим за вашу подпись! 💗
+            </p>
+            <p className="text-[11px] sm:text-xs font-minecraft text-white/90 leading-relaxed">
+              Если вы снова решите перечитать книгу, обновите страницу сайта.
+            </p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="mc-button mt-1.5 h-7 px-3.5 text-[11px] font-minecraft text-white/90 active:scale-95 cursor-pointer"
+            >
+              Обновить страницу сайта
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 type FlipState = {
   id: number;
   fromSpread: number;
@@ -449,6 +624,16 @@ export function MinecraftBook() {
   const totalSpreads = allSpreads.length;
   const [currentSpread, setCurrentSpread] = useState(1);
   const spreadRef = useRef(1);
+  const [isClosedForSigning, setIsClosedForSigning] = useState(false);
+
+  const handleCloseBookForSigning = useCallback(() => {
+    try {
+      const closeAudio = new Audio("/book_close.ogg");
+      closeAudio.volume = 0.95;
+      void closeAudio.play().catch(() => {});
+    } catch {}
+    setIsClosedForSigning(true);
+  }, []);
 
   const getSpread = useCallback(
     (idx: number) => allSpreads[Math.max(0, Math.min(allSpreads.length - 1, idx - 1))],
@@ -531,6 +716,7 @@ export function MinecraftBook() {
   // Навигация стрелками на клавиатуре
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      if (isClosedForSigning) return;
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
         nextSpread();
@@ -582,14 +768,17 @@ export function MinecraftBook() {
         />
       </div>
 
-      {/* ── САМА ДВУХСТРАНИЧНАЯ КНИГА MINECRAFT (РАЗВОРОТ НА 2 СТРАНИЦЫ) ────── */}
+      {/* ── САМА КНИГА: ЛИБО ДВУХСТРАНИЧНЫЙ РАЗВОРОТ, ЛИБО ЗАКРЫТАЯ ОБЛОЖКА ────── */}
       <div className="relative z-10 flex items-center justify-center w-full">
-        <div
-          className="relative aspect-[292/180] w-[min(94vw,880px)] max-h-[min(520px,68vh)] select-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)]"
-          style={{
-            imageRendering: "pixelated",
-          }}
-        >
+        {isClosedForSigning ? (
+          <ClosedBookCover />
+        ) : (
+          <div
+            className="relative aspect-[292/180] w-[min(94vw,880px)] max-h-[min(520px,68vh)] select-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)]"
+            style={{
+              imageRendering: "pixelated",
+            }}
+          >
           {/* ── 3D-СЦЕНА СТРАНИЦ КНИГИ (ИЗОЛИРОВАННЫЙ 3D КОНТЕКСТ) ── */}
           <div
             className="absolute inset-0 size-full"
@@ -685,6 +874,22 @@ export function MinecraftBook() {
                   draggable={false}
                   className="size-full object-fill pixelated"
                 />
+              </button>
+            ) : null}
+
+            {/* На самой последней странице вместо стрелочки/галочки перехода — кнопка «Подписать книгу» */}
+            {!flipState && currentSpread === totalSpreads ? (
+              <button
+                type="button"
+                onClick={handleCloseBookForSigning}
+                className="mc-button absolute z-30 cursor-pointer outline-none transition-transform active:scale-95 pixelated flex items-center justify-center gap-1.5 px-3 py-1.5 text-[11px] sm:text-xs font-minecraft font-bold !text-amber-300 shadow-md"
+                style={{
+                  bottom: "6.2%",
+                  right: "10%",
+                }}
+                title="Закрыть книгу и подписать"
+              >
+                <span>Подписать книгу</span>
               </button>
             ) : null}
           </div>
@@ -826,6 +1031,7 @@ export function MinecraftBook() {
             </div>
           </div>
         </div>
+      )}
       </div>
     </div>
   );
