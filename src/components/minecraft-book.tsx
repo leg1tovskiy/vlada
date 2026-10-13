@@ -38,6 +38,9 @@ const pageAudio = new PageTurnAudio();
 
 export interface BookPageData {
   wishId?: number;
+  author?: string;
+  isBold?: boolean;
+  fontSize?: "large" | "normal";
   headerTitle: string;
   date?: string;
   text: string;
@@ -147,8 +150,13 @@ export function buildAllSpreads(wishesList: VladaWishItem[]): BookSpreadData[] {
       const isLeftLast = pLeftIdx === pages.length - 1;
       const isRightLast = pRightIdx === pages.length - 1;
 
+      const isOblomeWish = wish.author.toLowerCase() === "oblome" || wish.id === 1;
+
       const leftPage: BookPageData = {
         wishId: wish.id,
+        author: wish.author,
+        isBold: isOblomeWish || wish.isBold,
+        fontSize: isOblomeWish ? "large" : wish.fontSize,
         headerTitle: isFirstSpreadOfWish
           ? `Поздравление #${wish.id}`
           : `Поздравление #${wish.id} (продолжение)`,
@@ -161,6 +169,9 @@ export function buildAllSpreads(wishesList: VladaWishItem[]): BookSpreadData[] {
       if (pRightIdx < pages.length) {
         rightPage = {
           wishId: wish.id,
+          author: wish.author,
+          isBold: isOblomeWish || wish.isBold,
+          fontSize: isOblomeWish ? "large" : wish.fontSize,
           headerTitle: "(продолжение)",
           date: undefined,
           text: pages[pRightIdx],
@@ -256,6 +267,13 @@ function PageContent({ page }: { page: BookPageData | null }) {
     return <div className="size-full" />;
   }
 
+  const isOblome =
+    Boolean(page.isBold) ||
+    page.fontSize === "large" ||
+    page.author?.toLowerCase() === "oblome" ||
+    page.authorSignature?.toLowerCase() === "oblome" ||
+    page.wishId === 1;
+
   return (
     <div className="flex h-full flex-col justify-between text-black font-minecraft leading-[1.42]">
       <div className="flex-1 min-h-0 overflow-hidden select-text">
@@ -263,7 +281,7 @@ function PageContent({ page }: { page: BookPageData | null }) {
           <div className="flex items-center justify-between pb-1.5 border-b border-black/10">
             <span
               className="font-bold text-black/80 flex items-center gap-1"
-              style={{ fontSize: "clamp(11px, 1.7vw, 14px)" }}
+              style={{ fontSize: isOblome ? "clamp(12px, 1.8vw, 15px)" : "clamp(11px, 1.7vw, 14px)" }}
             >
               <span>{page.headerTitle}</span>
             </span>
@@ -279,8 +297,13 @@ function PageContent({ page }: { page: BookPageData | null }) {
         ) : null}
 
         <div
-          className="mt-2 text-black font-normal whitespace-pre-wrap leading-relaxed"
-          style={{ fontSize: "clamp(11px, 1.55vw, 13px)", lineHeight: "1.42" }}
+          className={`mt-2 text-black whitespace-pre-wrap leading-relaxed ${
+            isOblome ? "font-bold" : "font-normal"
+          }`}
+          style={{
+            fontSize: isOblome ? "clamp(13px, 1.9vw, 16px)" : "clamp(11px, 1.55vw, 13px)",
+            lineHeight: isOblome ? "1.45" : "1.42",
+          }}
         >
           {page.text}
         </div>
@@ -290,7 +313,7 @@ function PageContent({ page }: { page: BookPageData | null }) {
         <div className="pt-1.5 text-right pr-2 shrink-0">
           <p
             className="font-bold text-black"
-            style={{ fontSize: "clamp(11.5px, 1.7vw, 14.5px)" }}
+            style={{ fontSize: isOblome ? "clamp(13px, 2vw, 16.5px)" : "clamp(11.5px, 1.7vw, 14.5px)" }}
           >
             — {page.authorSignature}
           </p>
