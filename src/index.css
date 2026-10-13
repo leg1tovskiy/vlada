@@ -13,7 +13,7 @@
 @font-face {
   font-family: "Minecraft";
   src: url("/fonts/MinecraftDefault-Bold.ttf") format("truetype");
-  font-weight: 700;
+  font-weight: 600 900;
   font-style: normal;
   font-display: swap;
 }
@@ -22,6 +22,12 @@
   font-family: "Minecraft", monospace;
   font-smooth: never;
   -webkit-font-smoothing: none;
+}
+
+.minecraft-extra-bold {
+  font-weight: 900 !important;
+  text-shadow: 1px 0 0 #000, 0.5px 0.5px 0 #000 !important;
+  -webkit-text-stroke: 0.5px #000;
 }
 
 .pixelated {

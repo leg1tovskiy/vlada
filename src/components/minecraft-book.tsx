@@ -298,11 +298,11 @@ function PageContent({ page }: { page: BookPageData | null }) {
 
         <div
           className={`mt-2 text-black whitespace-pre-wrap leading-relaxed ${
-            isOblome ? "font-bold" : "font-normal"
+            isOblome ? "minecraft-extra-bold" : "font-normal"
           }`}
           style={{
-            fontSize: isOblome ? "clamp(13px, 1.9vw, 16px)" : "clamp(11px, 1.55vw, 13px)",
-            lineHeight: isOblome ? "1.45" : "1.42",
+            fontSize: isOblome ? "clamp(13.5px, 2.1vw, 17px)" : "clamp(11px, 1.55vw, 13px)",
+            lineHeight: isOblome ? "1.46" : "1.42",
           }}
         >
           {page.text}
@@ -312,8 +312,8 @@ function PageContent({ page }: { page: BookPageData | null }) {
       {page.authorSignature ? (
         <div className="pt-1.5 text-right pr-2 shrink-0">
           <p
-            className="font-bold text-black"
-            style={{ fontSize: isOblome ? "clamp(13px, 2vw, 16.5px)" : "clamp(11.5px, 1.7vw, 14.5px)" }}
+            className={`text-black ${isOblome ? "minecraft-extra-bold" : "font-bold"}`}
+            style={{ fontSize: isOblome ? "clamp(13.5px, 2.1vw, 17px)" : "clamp(11.5px, 1.7vw, 14.5px)" }}
           >
             — {page.authorSignature}
           </p>
